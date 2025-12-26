@@ -1,0 +1,58 @@
+{% extends "layout/base.html" %}
+{% from "layout/ranking_table.html" import ranking_table %}
+
+{% block breadcrumb %}Temporada • Rankings{% endblock %}
+{% block page_title %}Ranking de Times{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="/temporadas/{{temporada_id}}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+    Voltar para temporada
+  </a>
+</div>
+
+{% set cols = [
+  {"label":"#","class":"text-left py-3 px-3 text-slate-500 font-semibold w-10"},
+  {"label":"Time","class":"text-left py-3 px-3 text-slate-500 font-semibold"},
+  {"label":"Pts","class":"text-right py-3 px-3 text-slate-500 font-semibold w-16"},
+  {"label":"J","class":"text-right py-3 px-3 text-slate-500 font-semibold w-12"},
+  {"label":"V","class":"text-right py-3 px-3 text-slate-500 font-semibold w-12"},
+  {"label":"E","class":"text-right py-3 px-3 text-slate-500 font-semibold w-12"},
+  {"label":"D","class":"text-right py-3 px-3 text-slate-500 font-semibold w-12"},
+] %}
+
+{% set rows = [] %}
+{% for item in ranking %}
+  {% set t = item.time %}
+  {% set escudo_html = '' %}
+  {% if t.escudo_url %}
+    {% set escudo_html = '<img src="http://127.0.0.1:5001' ~ t.escudo_url ~ '" alt="' ~ t.nome ~ '" class="w-8 h-8 rounded-md object-cover border border-slate-300/60 inline-block mr-2 align-middle" />' %}
+  {% else %}
+    {% set escudo_html = '<div class="w-8 h-8 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center inline-block mr-2 align-middle"><i data-lucide="shirt" class="w-4 h-4 text-white"></i></div>' %}
+  {% endif %}
+  {% set _ = rows.append([
+    {"value": item.posicao, "class":"py-3 px-3 font-medium text-slate-700"},
+    {"value": (escudo_html ~ '<span class="align-middle">' ~ t.nome ~ '</span>')|safe, "class":"py-3 px-3 font-semibold text-slate-900"},
+    {"value": (t.pontos or 0), "class":"py-3 px-3 text-right font-medium text-slate-900"},
+    {"value": (t.jogos or 0), "class":"py-3 px-3 text-right text-slate-700"},
+    {"value": (t.vitorias or 0), "class":"py-3 px-3 text-right font-semibold text-slate-700"},
+    {"value": (t.empates or 0), "class":"py-3 px-3 text-right text-slate-700"},
+    {"value": (t.derrotas or 0), "class":"py-3 px-3 text-right font-semibold text-slate-700"},
+  ]) %}
+{% endfor %}
+
+{% if rows|length == 0 %}
+  {% set _ = rows.append([
+    {"value":"—","class":"py-3 px-3 text-slate-500"},
+    {"value":"Sem dados.","class":"py-3 px-3 text-slate-500"},
+    {"value":"—","class":"py-3 px-3 text-right text-slate-500"},
+    {"value":"—","class":"py-3 px-3 text-right text-slate-500"},
+    {"value":"—","class":"py-3 px-3 text-right text-slate-500"},
+    {"value":"—","class":"py-3 px-3 text-right text-slate-500"},
+    {"value":"—","class":"py-3 px-3 text-right text-slate-500"},
+  ]) %}
+{% endif %}
+
+{{ ranking_table("Tabela", "Temporada #" ~ temporada_id, cols, rows, "trophy", "blue") }}
+{% endblock %}

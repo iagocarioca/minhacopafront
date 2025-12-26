@@ -1,0 +1,121 @@
+{% set casa = partida.time_casa_full or partida.time_casa or {} %}
+{% set fora = partida.time_fora_full or partida.time_fora or {} %}
+
+<!-- Card verde grande estilo imagem -->
+<div class="rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 overflow-hidden shadow-lg">
+  <!-- Header do card -->
+  <div class="px-5 pt-5 pb-3">
+    <div class="text-xs font-medium text-emerald-50/90 uppercase tracking-wider mb-2">
+      {% if partida.rodada and partida.rodada.nome %}{{ partida.rodada.nome }}{% else %}Partida{% endif %}
+    </div>
+    <div class="text-xs text-emerald-50/80">
+      {% if partida.inicio %}{{ partida.inicio | data_br(True) }}{% else %}Agendada{% endif %}
+    </div>
+  </div>
+
+  <!-- Placar principal -->
+  <div class="px-6 py-8">
+    <div class="flex items-center justify-between gap-4">
+      <!-- Time Casa -->
+      <div class="flex-1 text-center min-w-0">
+        <!-- Logo do time (escudo ou placeholder circular) -->
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 rounded-full bg-white/20 backdrop-blur-sm grid place-items-center border-2 border-white/30 overflow-hidden">
+          {% if casa.escudo_url %}
+            <img src="http://127.0.0.1:5001{{ casa.escudo_url }}" alt="{{ casa.nome }}" class="w-full h-full object-cover" />
+          {% elif casa.nome %}
+            <span class="text-white font-medium text-lg sm:text-xl">{{ (casa.nome[0:2] if casa.nome|length > 2 else casa.nome[0]) | upper }}</span>
+          {% else %}
+            <i data-lucide="shirt" class="w-8 h-8 sm:w-10 sm:h-10 text-white/80"></i>
+          {% endif %}
+        </div>
+        <!-- Nome do time -->
+        <div class="text-sm sm:text-base font-semibold text-white mb-1 truncate">{{ casa.nome or "Casa" }}</div>
+        <div class="text-xs text-emerald-50/80">Home</div>
+      </div>
+
+      <!-- Score -->
+      <div class="flex flex-col items-center justify-center">
+        <div class="text-5xl sm:text-6xl md:text-7xl font-medium text-white leading-none mb-2">
+          {{ partida.gols_casa or 0 }} - {{ partida.gols_fora or 0 }}
+        </div>
+        {% if partida.status == 'em_andamento' %}
+          <div class="text-xs text-emerald-50/90 font-medium">
+            {% if partida.gols and partida.gols|length %}
+              {% set ultimo_gol = partida.gols[-1] %}
+              {% if ultimo_gol.minuto %}{{ ultimo_gol.minuto }}'{% endif %}
+            {% else %}
+              Em andamento
+            {% endif %}
+          </div>
+        {% elif partida.status == 'finalizada' %}
+          <div class="text-xs text-emerald-50/90 font-medium">Finalizada</div>
+        {% else %}
+          <div class="text-xs text-emerald-50/90 font-medium">Agendada</div>
+        {% endif %}
+      </div>
+
+      <!-- Time Fora -->
+      <div class="flex-1 text-center min-w-0">
+        <!-- Logo do time (escudo ou placeholder circular) -->
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 rounded-full bg-white/20 backdrop-blur-sm grid place-items-center border-2 border-white/30 overflow-hidden">
+          {% if fora.escudo_url %}
+            <img src="http://127.0.0.1:5001{{ fora.escudo_url }}" alt="{{ fora.nome }}" class="w-full h-full object-cover" />
+          {% elif fora.nome %}
+            <span class="text-white font-medium text-lg sm:text-xl">{{ (fora.nome[0:2] if fora.nome|length > 2 else fora.nome[0]) | upper }}</span>
+          {% else %}
+            <i data-lucide="shirt" class="w-8 h-8 sm:w-10 sm:h-10 text-white/80"></i>
+          {% endif %}
+        </div>
+        <!-- Nome do time -->
+        <div class="text-sm sm:text-base font-semibold text-white mb-1 truncate">{{ fora.nome or "Fora" }}</div>
+        <div class="text-xs text-emerald-50/80">Away</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gols marcados (se houver) -->
+  {% if partida.gols and partida.gols|length %}
+    {% from "layout/soccer_ball_icon.html" import soccer_ball_icon %}
+    <div class="px-6 pb-5 pt-2 border-t border-white/20">
+      <div class="space-y-2">
+        {% for g in partida.gols[:5] %}
+          <div class="flex items-center justify-center gap-2 text-xs text-emerald-50/90">
+            {{ soccer_ball_icon("w-3 h-3", "currentColor", "flex-shrink-0") }}
+            <span class="font-semibold">
+              {% if g.minuto is not none %}{{ g.minuto }}'{% endif %}
+            </span>
+            <span>{{ (g.jogador.apelido if g.jogador else None) or (g.jogador.nome_completo if g.jogador else None) or "Jogador" }}</span>
+            {% if g.gol_contra %}<span class="text-rose-200">(GC)</span>{% endif %}
+          </div>
+        {% endfor %}
+        {% if partida.gols|length > 5 %}
+          <div class="text-xs text-emerald-50/70 text-center">+{{ partida.gols|length - 5 }} mais</div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Botões de ação -->
+  {% if partida.status == "agendada" or partida.status == "em_andamento" %}
+    <div class="px-6 pb-5 pt-3 border-t border-white/20">
+      <div class="grid grid-cols-2 gap-3">
+        {% if partida.status == "agendada" %}
+          <form method="post" action="/partidas/{{partida.id}}/iniciar">
+            <button class="w-full h-10 rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-semibold transition-all inline-flex items-center justify-center gap-2 border border-white/30">
+              <i data-lucide="play" class="w-3.5 h-3.5"></i>
+              Iniciar
+            </button>
+          </form>
+        {% endif %}
+        {% if partida.status == "em_andamento" %}
+          <form method="post" action="/partidas/{{partida.id}}/finalizar">
+            <button class="w-full h-10 rounded-md bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white text-xs font-semibold transition-all inline-flex items-center justify-center gap-2 border border-white/30">
+              <i data-lucide="stop-circle" class="w-3.5 h-3.5"></i>
+              Finalizar
+            </button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>

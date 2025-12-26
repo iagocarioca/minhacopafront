@@ -1,0 +1,36 @@
+{% from "layout/card.html" import card %}
+
+{% macro ranking_table(title, subtitle, cols, rows, icon="trophy", accent_color="blue") -%}
+  {% call card(title, subtitle, icon, accent_color) %}
+    {% if rows and rows|length %}
+      <div class="overflow-x-auto rounded-lg border border-slate-300/60">
+        <table class="w-full text-xs">
+          <thead>
+            <tr class="border-b border-slate-300/50 bg-white/30">
+              {% for col in cols %}
+                <th class="{{ col.class if col.class else 'text-left py-2.5 px-3 text-[11px] text-slate-600 font-semibold' }}">{{ col.label }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr class="border-b border-slate-300/30 hover:bg-white/40 transition-all">
+                {% for cell in row %}
+                  <td class="{{ cell.class if cell.class else 'py-2.5 px-3 text-slate-700' }}">{{ cell.value }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="text-center py-10">
+        <div class="mb-3 inline-flex items-center justify-center w-11 h-11 rounded-lg bg-white/40 border border-slate-300/60 text-slate-500">
+          <i data-lucide="{{ icon }}" class="w-5 h-5"></i>
+        </div>
+        <div class="text-sm text-slate-700 font-medium">Nenhum dado de ranking ainda</div>
+        <div class="text-xs text-slate-500 mt-1">Finalize algumas partidas para ver o ranking.</div>
+      </div>
+    {% endif %}
+  {% endcall %}
+{%- endmacro %}

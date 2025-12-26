@@ -1,0 +1,13 @@
+{% macro card(title=None, subtitle=None, icon=None, accent_color=None) -%}
+  <div class="rounded-md bg-white/60 backdrop-blur-xl shadow-sm p-5 transition-all">
+    {% if title %}
+      <div class="mb-4">
+        <div class="text-base font-medium text-slate-900 truncate">{{ title }}</div>
+        {% if subtitle %}
+          <div class="text-xs text-slate-500 mt-1 truncate">{{ subtitle }}</div>
+        {% endif %}
+      </div>
+    {% endif %}
+    {{ caller() }}
+  </div>
+{%- endmacro %}

@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}EFootBool{% endblock %}</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'primary': {
+              DEFAULT: '#3B82F6',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+            },
+          },
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-feature-settings: "ss01" 1;
+      letter-spacing: -0.011em;
+      background: #F5F5F7;
+    }
+    .transition-all {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-slate-900 antialiased text-[13px]">
+  <div class="min-h-screen grid place-items-center px-4 py-10">
+    <div class="w-full max-w-md">
+      <div class="mb-5 flex items-center justify-center gap-2.5">
+        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-primary-600 grid place-items-center">
+          <i data-lucide="soccer-ball" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="text-sm font-semibold text-slate-900">EFootBool</div>
+          <div class="text-[11px] text-slate-500">Gestão de Peladas</div>
+        </div>
+      </div>
+
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          <div class="space-y-2 mb-5">
+            {% for cat, msg in msgs %}
+              <div class="rounded-lg px-4 py-3 text-xs border backdrop-blur-xl
+                {% if cat == 'ok' %}
+                  bg-emerald-50/60 border-emerald-300/60 text-emerald-800
+                {% else %}
+                  bg-rose-50/60 border-rose-300/60 text-rose-800
+                {% endif %}">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <main>
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script>
+    try { window.lucide && window.lucide.createIcons(); } catch(e) {}
+    document.body.addEventListener('htmx:load', () => {
+      try { window.lucide && window.lucide.createIcons(); } catch(e) {}
+    });
+    document.body.addEventListener('htmx:afterSwap', () => {
+      try { window.lucide && window.lucide.createIcons(); } catch(e) {}
+    });
+  </script>
+</body>
+</html>

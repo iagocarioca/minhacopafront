@@ -1,0 +1,50 @@
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+{% block breadcrumb %}Temporada • Rankings{% endblock %}
+{% block page_title %}Rankings{% endblock %}
+{% block content %}
+
+<div class="max-w-5xl mx-auto">
+  {% call card("Rankings", "Escolha o tipo de ranking", "bar-chart-3", "blue") %}
+  <div class="grid md:grid-cols-3 gap-4">
+    <a href="/temporadas/{{temporada_id}}/ranking/times" class="group block">
+      <div class="rounded-md bg-white/60 backdrop-blur-xl p-6 flex flex-col items-center gap-4 text-center transition-all hover:bg-white/80">
+        <div class="w-14 h-14 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 grid place-items-center">
+          <i data-lucide="trophy" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+          <div class="text-sm font-medium text-slate-900 mb-1">Ranking de Times</div>
+          <div class="text-xs text-slate-500">Tabela e desempenho</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="/temporadas/{{temporada_id}}/ranking/artilheiros" class="group block">
+      <div class="rounded-md bg-white/60 backdrop-blur-xl p-6 flex flex-col items-center gap-4 text-center transition-all hover:bg-white/80">
+        <div class="w-14 h-14 rounded-md bg-gradient-to-br from-purple-500 to-purple-600 grid place-items-center">
+          {% from "layout/soccer_ball_icon.html" import soccer_ball_icon %}
+          {{ soccer_ball_icon("w-7 h-7", "white", "") }}
+        </div>
+        <div>
+          <div class="text-sm font-medium text-slate-900 mb-1">Artilheiros</div>
+          <div class="text-xs text-slate-500">Gols marcados</div>
+        </div>
+      </div>
+    </a>
+
+    <a href="/temporadas/{{temporada_id}}/ranking/assistencias" class="group block">
+      <div class="rounded-md bg-white/60 backdrop-blur-xl p-6 flex flex-col items-center gap-4 text-center transition-all hover:bg-white/80">
+        <div class="w-14 h-14 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
+          <i data-lucide="target" class="w-7 h-7 text-white"></i>
+        </div>
+        <div>
+          <div class="text-sm font-medium text-slate-900 mb-1">Assistências</div>
+          <div class="text-xs text-slate-500">Maiores garçons</div>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endcall %}
+</div>
+
+{% endblock %}

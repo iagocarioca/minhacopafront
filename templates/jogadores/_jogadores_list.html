@@ -1,0 +1,33 @@
+{% for j in (data.data or []) %}
+  <div class="rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border p-3 flex items-center justify-between gap-2 group transition-all">
+    <div class="flex items-center gap-3 flex-1">
+      {% if j.foto_url %}
+        <img src="http://127.0.0.1:5001{{ j.foto_url }}" alt="{{ j.apelido or j.nome_completo }}" class="w-10 h-10 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
+      {% else %}
+        <div class="w-10 h-10 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center flex-shrink-0">
+          <i data-lucide="user" class="w-5 h-5 text-white"></i>
+        </div>
+      {% endif %}
+      <div class="flex-1">
+        <div class="text-sm font-semibold text-slate-900">{{ j.apelido or j.nome_completo }}</div>
+        <div class="text-xs text-slate-500 mt-0.5 inline-flex items-center gap-1">
+          <i data-lucide="phone" class="w-3.5 h-3.5"></i>
+          {{ j.telefone or "Sem telefone" }}
+        </div>
+      </div>
+    </div>
+    <a class="text-xs font-medium text-slate-700 hover:text-slate-900 px-3 py-2 rounded-lg bg-white/60 border border-slate-300/60 hover-border transition-all inline-flex items-center gap-2" href="/jogadores/{{j.id}}/edit">
+      <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+      Editar
+    </a>
+  </div>
+{% else %}
+  <div class="text-center py-8">
+    <div class="mb-3 inline-flex items-center justify-center w-11 h-11 rounded-lg bg-blue-50/70 border border-blue-300/60 text-blue-600">
+      <i data-lucide="users" class="w-5 h-5"></i>
+    </div>
+    <div class="text-sm text-slate-800 font-semibold">Nenhum jogador cadastrado</div>
+    <div class="text-xs text-slate-600 mt-1">Adicione seu primeiro jogador.</div>
+  </div>
+{% endfor %}
+

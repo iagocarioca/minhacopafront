@@ -1,0 +1,98 @@
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+{% block breadcrumb %}Rodada{% endblock %}
+{% block page_title %}Rodada{% endblock %}
+{% block content %}
+<!-- Header -->
+<div class="mb-6">
+  <h2 class="text-lg font-semibold text-slate-900 mb-1 inline-flex items-center gap-2">
+    <i data-lucide="calendar" class="w-5 h-5 text-slate-600"></i>
+    Rodada {{ rodada.data_rodada | data_br if rodada.data_rodada else "—" }}
+  </h2>
+  <div class="text-sm text-slate-600 flex items-center gap-3">
+    <span class="inline-flex items-center gap-2 text-[11px] px-2.5 py-1 rounded-md bg-slate-50/70 border border-slate-300/60 text-slate-700">
+      <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+      {{ rodada.status }}
+    </span>
+    <span>•</span>
+    <span>{{ rodada.quantidade_times }} times</span>
+    <span>•</span>
+    <span>{{ rodada.jogadores_por_time }} jogadores/time</span>
+  </div>
+</div>
+
+<!-- Fluxo de trabalho -->
+<div class="mb-6 p-4 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60">
+  <div class="flex items-center gap-2 mb-3">
+    <i data-lucide="info" class="w-4 h-4 text-slate-600"></i>
+    <div class="text-sm font-semibold text-slate-900">Fluxo da Rodada</div>
+  </div>
+  <div class="grid md:grid-cols-3 gap-3">
+    <div class="flex items-start gap-2">
+      <div class="flex-shrink-0 w-6 h-6 rounded-full bg-white/60 border border-slate-300/60 text-slate-700 flex items-center justify-center text-xs font-semibold">1</div>
+      <div>
+        <div class="text-xs font-semibold text-slate-900">Escalar jogadores</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Adicione jogadores aos times</div>
+      </div>
+    </div>
+    <div class="flex items-start gap-2">
+      <div class="flex-shrink-0 w-6 h-6 rounded-full bg-white/60 border border-slate-300/60 text-slate-700 flex items-center justify-center text-xs font-semibold">2</div>
+      <div>
+        <div class="text-xs font-semibold text-slate-900">Criar partidas</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Defina os confrontos</div>
+      </div>
+    </div>
+    <div class="flex items-start gap-2">
+      <div class="flex-shrink-0 w-6 h-6 rounded-full bg-white/60 border border-slate-300/60 text-slate-700 flex items-center justify-center text-xs font-semibold">3</div>
+      <div>
+        <div class="text-xs font-semibold text-slate-900">Jogar e registrar</div>
+        <div class="text-[11px] text-slate-500 mt-0.5">Inicie e registre gols</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ações rápidas -->
+<div class="grid md:grid-cols-2 gap-4 mb-6">
+  <a href="/rodadas/{{rodada.id}}/partidas" class="group p-5 rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border transition-all">
+    <div class="w-11 h-11 rounded-lg bg-primary-50/70 border border-primary-300/60 grid place-items-center text-primary-700 mb-3">
+      <i data-lucide="swords" class="w-5 h-5"></i>
+    </div>
+    <div class="text-sm font-semibold text-slate-900">Partidas</div>
+    <div class="text-xs text-slate-500 mt-1">Ver e criar partidas</div>
+  </a>
+
+  <a href="/rodadas/{{rodada.id}}/votacoes" class="group p-5 rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border transition-all">
+    <div class="w-11 h-11 rounded-lg bg-purple-50/70 border border-purple-300/60 grid place-items-center text-purple-700 mb-3">
+      <i data-lucide="vote" class="w-5 h-5"></i>
+    </div>
+    <div class="text-sm font-semibold text-slate-900">Votações</div>
+    <div class="text-xs text-slate-500 mt-1">MVP e destaques</div>
+  </a>
+</div>
+
+<!-- Times da rodada (só mostra se houver times) -->
+{% if rodada.times and rodada.times|length > 0 %}
+  {% call card("Times da Rodada", rodada.times|length ~ " times cadastrados", "shirt", "yellow") %}
+    <div class="space-y-2">
+      {% for t in rodada.times %}
+        <a href="/times/{{t.id}}" class="block rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl p-3.5 hover-border transition-all group">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="text-sm font-semibold text-slate-900">{{ t.nome }}</div>
+              <div class="text-xs text-slate-500 mt-1">
+                {% if t.pontos is defined or t.saldo_gols is defined %}
+                  Pontos: {{ t.pontos or 0 }} • Saldo de gols: {{ t.saldo_gols or 0 }}
+                {% else %}
+                  Time participante
+                {% endif %}
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% endcall %}
+{% endif %}
+{% endblock %}

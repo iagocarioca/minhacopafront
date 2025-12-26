@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EFootBool • Detalhes da Partida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    boxShadow: { soft: "0 10px 30px rgba(0,0,0,.20)" }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="min-h-screen bg-slate-950 text-slate-100">
+    <!-- Mobile overlay (sidebar) -->
+    <div id="overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-40"></div>
+
+    <div class="min-h-screen lg:grid lg:grid-cols-12">
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed lg:static z-50 lg:z-auto inset-y-0 left-0 w-[290px] lg:w-auto
+             bg-slate-900/70 backdrop-blur border-r border-white/10
+             -translate-x-full lg:translate-x-0 transition-transform duration-200
+             lg:col-span-3 xl:col-span-2">
+            <div class="h-full flex flex-col">
+                <div class="px-5 py-5 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-white/10 border border-white/10 grid place-items-center">
+                            <i data-lucide="soccer-ball" class="w-5 h-5"></i>
+                        </div>
+                        <div class="leading-tight">
+                            <p class="font-semibold">EFootBool</p>
+                            <p class="text-xs text-white/50">Painel</p>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="px-3 py-4 flex-1 overflow-auto">
+                    <p class="px-2 text-xs text-white/40 mb-2">MENU</p>
+
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5" href="dashboard.html"><span
+                            class="w-6 text-center"><i data-lucide="layout-grid"
+                                class="w-4 h-4 mx-auto"></i></span><span class="text-sm">Dashboard</span></a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5" href="peladas.html"><span
+                            class="w-6 text-center"><i data-lucide="soccer-ball"
+                                class="w-4 h-4 mx-auto"></i></span><span class="text-sm">Minhas Peladas</span></a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5" href="jogadores.html"><span
+                            class="w-6 text-center"><i data-lucide="users" class="w-4 h-4 mx-auto"></i></span><span
+                            class="text-sm">Jogadores</span></a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5"
+                        href="temporadas.html"><span class="w-6 text-center"><i data-lucide="calendar"
+                                class="w-4 h-4 mx-auto"></i></span><span class="text-sm">Temporadas</span></a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5" href="rodadas.html"><span
+                            class="w-6 text-center"><i data-lucide="trophy" class="w-4 h-4 mx-auto"></i></span><span
+                            class="text-sm">Rodadas</span></a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5" href="times.html"><span
+                            class="w-6 text-center"><i data-lucide="shirt" class="w-4 h-4 mx-auto"></i></span><span
+                            class="text-sm">Times</span></a>
+
+                    <!-- Active item -->
+                    <a class="mt-1 flex items-center gap-3 px-3 py-2 rounded-xl bg-white/10 border border-white/10"
+                        href="partidas.html">
+                        <span class="w-6 text-center"><i data-lucide="swords" class="w-4 h-4 mx-auto"></i></span>
+                        <span class="text-sm font-semibold">Partidas</span>
+                    </a>
+
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 mt-1"
+                        href="rankings.html"><span class="w-6 text-center"><i data-lucide="bar-chart-3"
+                                class="w-4 h-4 mx-auto"></i></span><span class="text-sm">Rankings</span></a>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5 mt-1"
+                        href="configuracoes.html"><span class="w-6 text-center"><i data-lucide="settings"
+                                class="w-4 h-4 mx-auto"></i></span><span class="text-sm">Configurações</span></a>
+
+                    <div class="my-4 border-t border-white/10"></div>
+                    <a class="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/5" href="sair.html"><span
+                            class="w-6 text-center"><i data-lucide="log-out" class="w-4 h-4 mx-auto"></i></span><span
+                            class="text-sm">Sair</span></a>
+                </nav>
+
+                <div class="px-5 py-4 border-t border-white/10">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-white/10 border border-white/10"></div>
+                        <div class="leading-tight">
+                            <p class="text-sm font-semibold">Seu Nome</p>
+                            <p class="text-xs text-white/50">Organizador</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <div class="lg:col-span-9 xl:col-span-10">
+            <!-- Header -->
+            <header class="sticky top-0 z-30 bg-slate-950/80 backdrop-blur border-b border-white/10">
+                <div class="px-4 sm:px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <button id="btnOpen"
+                            class="lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10"
+                            aria-label="Abrir menu"><i data-lucide="menu" class="w-5 h-5 mx-auto"></i></button>
+                        <div class="leading-tight">
+                            <p class="text-xs text-white/50">Dashboard > Rodadas > Rodada #13 > Partida</p>
+                            <h1 class="text-lg font-semibold">Detalhes da Partida</h1>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <button
+                            class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm inline-flex items-center gap-2"><i
+                                data-lucide="bell" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Notificações</span></button>
+                        <button
+                            class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm inline-flex items-center gap-2"><i
+                                data-lucide="user" class="w-4 h-4"></i>
+                            <span class="hidden sm:inline">Perfil</span></button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content -->
+            <div class="px-4 sm:px-6 py-6 lg:grid lg:grid-cols-12 lg:gap-6">
+                <!-- Main column -->
+                <section class="lg:col-span-8 space-y-6">
+
+                    <!-- Match hero -->
+                    <div class="rounded-2xl bg-white/5 border border-white/10 shadow-soft p-4 sm:p-6">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="text-xs text-white/50">Status</p>
+                                <span
+                                    class="inline-flex items-center gap-2 text-xs px-2 py-1 rounded-full bg-white/10 border border-white/10 mt-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    Em andamento
+                                </span>
+                                <p class="text-xs text-white/50 mt-3">Início: <span class="text-white/80">19:30</span> •
+                                    Fim: <span class="text-white/80">—</span></p>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button
+                                    class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm"
+                                    title="Editar">✏️</button>
+                                <button
+                                    class="h-10 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm"
+                                    title="Compartilhar">🔗</button>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 grid grid-cols-3 items-center gap-3">
+                            <!-- Home team -->
+                            <div class="text-left">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 grid place-items-center text-xl">
+                                        🛡️</div>
+                                    <div class="leading-tight">
+                                        <p class="text-sm text-white/60">Casa</p>
+                                        <p class="text-lg font-semibold">Time Azul</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Score -->
+                            <div class="text-center">
+                                <p class="text-xs text-white/50">PLACAR</p>
+                                <div class="mt-1 text-4xl font-extrabold tracking-tight">
+                                    <span>3</span>
+                                    <span class="text-white/30 mx-2">x</span>
+                                    <span>2</span>
+                                </div>
+                                <p class="text-xs text-white/50 mt-2">Rodada #13 • 25/01/2025</p>
+                            </div>
+
+                            <!-- Away team -->
+                            <div class="text-right">
+                                <div class="flex items-center justify-end gap-3">
+                                    <div class="leading-tight">
+                                        <p class="text-sm text-white/60">Fora</p>
+                                        <p class="text-lg font-semibold">Time Vermelho</p>
+                                    </div>
+                                    <div
+                                        class="w-12 h-12 rounded-2xl bg-white/10 border border-white/10 grid place-items-center text-xl">
+                                        🛡️</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <button
+                                class="h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-semibold">
+                                Iniciar Partida
+                            </button>
+                            <button id="btnGol"
+                                class="h-11 rounded-xl bg-white/15 border border-white/10 hover:bg-white/20 text-sm font-semibold">
+                                Registrar Gol
+                            </button>
+                            <button
+                                class="h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-semibold">
+                                Finalizar Partida
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Goals timeline -->
+                    <div class="rounded-2xl bg-white/5 border border-white/10 shadow-soft">
+                        <div class="px-4 py-4 flex items-center justify-between border-b border-white/10">
+                            <h2 class="text-sm font-semibold">Gols da Partida</h2>
+                            <p class="text-xs text-white/50">Timeline</p>
+                        </div>
+
+                        <div class="p-4 space-y-3">
+                            <!-- Goal item -->
+                            <div
+                                class="rounded-xl bg-white/5 border border-white/10 p-3 flex items-start justify-between gap-3">
+                                <div class="flex gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-white/10 border border-white/10 grid place-items-center text-xs font-bold">
+                                        12’</div>
+                                    <div>
+                                        <p class="text-sm font-semibold">
+                                            Time Azul • João Silva
+                                            <span
+                                                class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-white/10 border border-white/10">Gol</span>
+                                        </p>
+                                        <p class="text-xs text-white/60">Assistência: Marcos</p>
+                                    </div>
+                                </div>
+                                <button
+                                    class="h-9 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs"
+                                    title="Remover gol">
+                                    🗑️
+                                </button>
+                            </div>
+
+                            <div
+                                class="rounded-xl bg-white/5 border border-white/10 p-3 flex items-start justify-between gap-3">
+                                <div class="flex gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-white/10 border border-white/10 grid place-items-center text-xs font-bold">
+                                        21’</div>
+                                    <div>
+                                        <p class="text-sm font-semibold">
+                                            Time Vermelho • Carlos Lima
+                                            <span
+                                                class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-white/10 border border-white/10">Gol</span>
+                                        </p>
+                                        <p class="text-xs text-white/60">Sem assistência</p>
+                                    </div>
+                                </div>
+                                <button
+                                    class="h-9 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs">🗑️</button>
+                            </div>
+
+                            <div
+                                class="rounded-xl bg-white/5 border border-white/10 p-3 flex items-start justify-between gap-3">
+                                <div class="flex gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-white/10 border border-white/10 grid place-items-center text-xs font-bold">
+                                        44’</div>
+                                    <div>
+                                        <p class="text-sm font-semibold">
+                                            Time Azul • Rafael Souza
+                                            <span
+                                                class="ml-2 text-[11px] px-2 py-0.5 rounded-full bg-white/10 border border-white/10">Gol
+                                                Contra</span>
+                                        </p>
+                                        <p class="text-xs text-white/60">Assistência: —</p>
+                                    </div>
+                                </div>
+                                <button
+                                    class="h-9 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-xs">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lineups -->
+                    <div class="rounded-2xl bg-white/5 border border-white/10 shadow-soft">
+                        <div class="px-4 py-4 flex items-center justify-between border-b border-white/10">
+                            <h2 class="text-sm font-semibold">Escalações</h2>
+                            <p class="text-xs text-white/50">Casa x Fora</p>
+                        </div>
+
+                        <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <!-- Home lineup -->
+                            <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+                                <p class="text-sm font-semibold">Time Azul</p>
+                                <ul class="mt-3 space-y-2">
+                                    <li class="flex items-center justify-between text-sm">
+                                        <span class="text-white/80">1 • Pedro</span>
+                                        <span
+                                            class="text-[11px] px-2 py-0.5 rounded-full bg-white/10 border border-white/10">Capitão</span>
+                                    </li>
+                                    <li class="flex items-center justify-between text-sm"><span class="text-white/80">2
+                                            • Lucas</span><span class="text-xs text-white/50">Zagueiro</span></li>
+                                    <li class="flex items-center justify-between text-sm"><span class="text-white/80">8
+                                            • Marcos</span><span class="text-xs text-white/50">Meia</span></li>
+                                    <li class="flex items-center justify-between text-sm"><span class="text-white/80">9
+                                            • João</span><span class="text-xs text-white/50">Atacante</span></li>
+                                </ul>
+                            </div>
+
+                            <!-- Away lineup -->
+                            <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+                                <p class="text-sm font-semibold text-right">Time Vermelho</p>
+                                <ul class="mt-3 space-y-2">
+                                    <li class="flex items-center justify-between text-sm">
+                                        <span
+                                            class="text-[11px] px-2 py-0.5 rounded-full bg-white/10 border border-white/10">Capitão</span>
+                                        <span class="text-white/80">1 • Bruno</span>
+                                    </li>
+                                    <li class="flex items-center justify-between text-sm"><span
+                                            class="text-xs text-white/50">Zagueiro</span><span class="text-white/80">3 •
+                                            Diego</span></li>
+                                    <li class="flex items-center justify-between text-sm"><span
+                                            class="text-xs text-white/50">Meia</span><span class="text-white/80">7 •
+                                            Felipe</span></li>
+                                    <li class="flex items-center justify-between text-sm"><span
+                                            class="text-xs text-white/50">Atacante</span><span class="text-white/80">9 •
+                                            Carlos</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right panel -->
+                <aside class="mt-6 lg:mt-0 lg:col-span-4 space-y-6">
+                    <!-- Summary -->
+                    <div class="rounded-2xl bg-white/5 border border-white/10 shadow-soft p-4">
+                        <h3 class="text-sm font-semibold">Resumo</h3>
+                        <div class="mt-3 grid grid-cols-2 gap-2">
+                            <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+                                <p class="text-xs text-white/50">Gols (Casa)</p>
+                                <p class="text-xl font-extrabold mt-1">3</p>
+                            </div>
+                            <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+                                <p class="text-xs text-white/50">Gols (Fora)</p>
+                                <p class="text-xl font-extrabold mt-1">2</p>
+                            </div>
+                            <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+                                <p class="text-xs text-white/50">Cartões</p>
+                                <p class="text-xl font-extrabold mt-1">0</p>
+                            </div>
+                            <div class="rounded-xl bg-white/5 border border-white/10 p-3">
+                                <p class="text-xs text-white/50">Tempo</p>
+                                <p class="text-xl font-extrabold mt-1">44’</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick actions -->
+                    <div class="rounded-2xl bg-white/5 border border-white/10 shadow-soft p-4">
+                        <h3 class="text-sm font-semibold">Ações</h3>
+                        <div class="mt-3 space-y-2">
+                            <button
+                                class="w-full h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-semibold">
+                                Ver Rodada
+                            </button>
+                            <button
+                                class="w-full h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-semibold">
+                                Ver Temporada
+                            </button>
+                            <button
+                                class="w-full h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-semibold">
+                                Ver Times
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Registrar Gol -->
+    <div id="modalGol" class="fixed inset-0 hidden z-[60]">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+        <div class="relative mx-auto max-w-lg w-[92%] mt-16 lg:mt-24">
+            <div class="rounded-2xl bg-slate-900 border border-white/10 shadow-soft overflow-hidden">
+                <div class="px-4 py-4 border-b border-white/10 flex items-center justify-between">
+                    <h3 class="text-sm font-semibold">Registrar Gol</h3>
+                    <button id="btnCloseModal"
+                        class="h-9 px-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm">✕</button>
+                </div>
+
+                <form class="p-4 space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="text-sm">
+                            <span class="text-xs text-white/60">Time</span>
+                            <select
+                                class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 outline-none">
+                                <option>Casa (Time Azul)</option>
+                                <option>Fora (Time Vermelho)</option>
+                            </select>
+                        </label>
+
+                        <label class="text-sm">
+                            <span class="text-xs text-white/60">Minuto (opcional)</span>
+                            <input type="number" placeholder="Ex: 27"
+                                class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 outline-none" />
+                        </label>
+                    </div>
+
+                    <label class="text-sm block">
+                        <span class="text-xs text-white/60">Jogador que marcou</span>
+                        <select class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 outline-none">
+                            <option>Selecione...</option>
+                            <option>João Silva</option>
+                            <option>Rafael Souza</option>
+                            <option>Carlos Lima</option>
+                        </select>
+                    </label>
+
+                    <label class="text-sm block">
+                        <span class="text-xs text-white/60">Assistência (opcional)</span>
+                        <select class="mt-1 w-full h-11 rounded-xl bg-white/5 border border-white/10 px-3 outline-none">
+                            <option>Sem assistência</option>
+                            <option>Marcos</option>
+                            <option>Lucas</option>
+                        </select>
+                    </label>
+
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" class="w-4 h-4 accent-white" />
+                        <span class="text-sm text-white/80">Gol contra</span>
+                    </label>
+
+                    <div class="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button type="button" id="btnCancelModal"
+                            class="h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 text-sm font-semibold">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                            class="h-11 rounded-xl bg-white/15 border border-white/10 hover:bg-white/20 text-sm font-semibold">
+                            Registrar
+                        </button>
+                    </div>
+
+                    <p class="text-[11px] text-white/40">
+                        (referência UI) — você pode ligar esse form na sua API depois.
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS: sidebar + modal -->
+    <script>
+        // Sidebar (mobile)
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("overlay");
+        const btnOpen = document.getElementById("btnOpen");
+
+        function openSidebar() {
+            sidebar.classList.remove("-translate-x-full");
+            overlay.classList.remove("hidden");
+        }
+        function closeSidebar() {
+            sidebar.classList.add("-translate-x-full");
+            overlay.classList.add("hidden");
+        }
+
+        btnOpen?.addEventListener("click", openSidebar);
+        overlay?.addEventListener("click", closeSidebar);
+
+        sidebar.querySelectorAll("a").forEach(a => {
+            a.addEventListener("click", () => {
+                if (window.innerWidth < 1024) closeSidebar();
+            });
+        });
+
+        window.addEventListener("resize", () => {
+            if (window.innerWidth >= 1024) {
+                overlay.classList.add("hidden");
+                sidebar.classList.remove("-translate-x-full");
+            } else {
+                sidebar.classList.add("-translate-x-full");
+            }
+        });
+
+        // Modal Registrar Gol
+        const modal = document.getElementById("modalGol");
+        const btnGol = document.getElementById("btnGol");
+        const btnClose = document.getElementById("btnCloseModal");
+        const btnCancel = document.getElementById("btnCancelModal");
+
+        function openModal() { modal.classList.remove("hidden"); }
+        function closeModal() { modal.classList.add("hidden"); }
+
+        btnGol?.addEventListener("click", openModal);
+        btnClose?.addEventListener("click", closeModal);
+        btnCancel?.addEventListener("click", closeModal);
+        modal?.addEventListener("click", (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // Lucide
+        try { window.lucide && window.lucide.createIcons(); } catch (e) { }
+    </script>
+</body>
+
+</html>

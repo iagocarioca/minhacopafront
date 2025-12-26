@@ -1,0 +1,105 @@
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+
+{% block breadcrumb %}Votações • Resultado{% endblock %}
+{% block page_title %}Resultado da Votação{% endblock %}
+
+{% block content %}
+{% call card("🏆 " ~ (votacao_info.tipo or "Votação"), "Resultado da votação", "trophy", "yellow") %}
+<div class="space-y-4">
+  {% if votacao_info %}
+  <div class="rounded-md bg-slate-50/70 backdrop-blur-xl p-4 space-y-2.5 text-xs ">
+    <div class="flex items-center justify-between">
+      <span class="text-slate-600">Período:</span>
+      <span class="text-slate-800 font-semibold">{{ (votacao_info.abre_em | data_br(True) if votacao_info.abre_em else "—") }} → {{ (votacao_info.fecha_em | data_br(True) if votacao_info.fecha_em else "—") }}</span>
+    </div>
+    <div class="flex items-center justify-between">
+      <span class="text-slate-600">Total de votos:</span>
+      <span class="font-medium text-slate-900 text-base">{{ total_votos }}</span>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if ranking and ranking|length %}
+  <div class="space-y-3">
+    {% for item in ranking %}
+    {% set position = loop.index %}
+    {% set jogador = item.jogador or {} %}
+    {% set pontos = item.total_pontos or 0 %}
+    {% set votos = item.votos or 0 %}
+    {% set porcentagem = item.porcentagem or 0 %}
+    <div class="rounded-md transition-all hover: {% if position == 1 %} bg-gradient-to-r from-yellow-50/80 to-orange-50/80 {% elif position == 2 %} bg-gradient-to-r from-slate-50/80 to-slate-100/80 {% elif position == 3 %} bg-gradient-to-r from-amber-50/80 to-amber-100/80 {% else %} bg-white/60 backdrop-blur-xl {% endif %} ">
+      <div class="p-4 flex items-center gap-4">
+        <!-- Posição -->
+        <div class="w-12 h-12 rounded-md flex items-center justify-center font-black text-xl {% if position == 1 %} bg-yellow-100 text-yellow-600 {% elif position == 2 %} bg-slate-200 text-slate-600 {% elif position == 3 %} bg-amber-200 text-amber-700 {% else %} bg-slate-100 text-slate-700 {% endif %} ">
+          {% if position == 1 %} 🥇 {% elif position == 2 %} 🥈 {% elif position == 3 %} 🥉 {% else %} {{ position }} {% endif %}
+        </div>
+
+        <!-- Foto do Jogador -->
+        <div class="flex-shrink-0">
+          {% if jogador.foto_url %}
+            <img src="http://127.0.0.1:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-12 h-12 rounded-md object-cover border border-slate-300/60" />
+          {% else %}
+            <div class="w-12 h-12 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
+              <i data-lucide="user" class="w-6 h-6 text-white"></i>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Info do Jogador -->
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium text-slate-900 truncate">
+            {{ jogador.apelido or jogador.nome_completo or "Jogador" }}
+          </div>
+          <div class="text-xs text-slate-500 mt-1">
+            {{ votos }} voto(s) • {{ "%.1f"|format(porcentagem) }}%
+          </div>
+        </div>
+
+        <!-- Pontos -->
+        <div class="text-right">
+          <div class="text-2xl font-medium {% if position == 1 %} text-yellow-600 {% elif position == 2 %} text-slate-700 {% elif position == 3 %} text-amber-700 {% else %} text-slate-900 {% endif %} ">
+            {{ pontos }}
+          </div>
+          <div class="text-[10px] text-slate-500 uppercase tracking-wide mt-0.5">pontos</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="text-center py-12">
+    <div class="w-16 h-16 rounded-md bg-slate-50/80 backdrop-blur-xl grid place-items-center mx-auto mb-4 text-slate-400 ">
+      <i data-lucide="award" class="w-8 h-8 opacity-50"></i>
+    </div>
+    <div class="text-sm text-slate-800 font-semibold">Nenhum voto registrado ainda</div>
+    <div class="text-xs text-slate-500 mt-1.5">Os resultados aparecerão aqui quando houver votos</div>
+    {% if rodada_id %}
+    <a href="{{ url_for('votacoes.votar', votacao_id=votacao_id, rodada_id=rodada_id) }}" class="mt-5 inline-flex items-center gap-2 h-11 px-5 rounded-md bg-white/60 backdrop-blur-xl text-sm font-semibold text-slate-700 transition-all hover:">
+      <i data-lucide="vote" class="w-4 h-4"></i>
+      Ir para votação
+    </a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endcall %}
+
+<div class="flex gap-3 mt-6">
+  {% if rodada_id %}
+  <a href="{{ url_for('votacoes.votar', votacao_id=votacao_id, rodada_id=rodada_id) }}" class="flex-1 h-12 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold inline-flex items-center justify-center gap-2 transition-all ">
+    <i data-lucide="check-square" class="w-4 h-4"></i>
+    Votar
+  </a>
+  <a href="{{ url_for('votacoes.criar', rodada_id=rodada_id) }}" class="flex-1 h-12 rounded-md bg-white/60 backdrop-blur-xl text-sm font-semibold text-slate-700 inline-flex items-center justify-center gap-2 transition-all hover:">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+    Voltar
+  </a>
+  {% else %}
+  <a href="/" class="flex-1 h-12 rounded-md bg-white/60 backdrop-blur-xl text-sm font-semibold text-slate-700 inline-flex items-center justify-center gap-2 transition-all hover:">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+    Início
+  </a>
+  {% endif %}
+</div>
+{% endblock %}

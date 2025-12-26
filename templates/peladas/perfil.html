@@ -1,0 +1,129 @@
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+{% block breadcrumb %}Pelada{% endblock %}
+{% block page_title %}Pelada{% endblock %}
+{% block content %}
+<!-- Capa de perfil -->
+{% if pelada.perfil_url %}
+  <div class="mb-6 -mx-6 sm:-mx-8 lg:-mx-12">
+    <img src="http://127.0.0.1:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
+  </div>
+{% endif %}
+
+<div class="mb-6">
+  <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center gap-3 flex-1">
+      {% if pelada.logo_url %}
+        <img src="http://127.0.0.1:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+      {% else %}
+        <img src="{{ url_for('static', filename='imgs/logo.png') }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+      {% endif %}
+      <div class="flex-1 min-w-0">
+        <h2 class="text-lg font-semibold text-slate-900 truncate">{{ pelada.nome }}</h2>
+        <div class="mt-1 text-sm text-slate-600 flex items-center gap-2 flex-wrap">
+          <span class="inline-flex items-center gap-2 text-[11px] px-2 py-0.5 rounded-full bg-white/60 border border-slate-300/60 text-slate-700">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+            {{ pelada.cidade }}
+          </span>
+          <span class="inline-flex items-center gap-2 text-[11px] px-2 py-0.5 rounded-full bg-white/60 border border-slate-300/60 text-slate-700">
+            <i data-lucide="hash" class="w-3.5 h-3.5"></i>
+            {{ pelada.id }}
+          </span>
+          <span class="inline-flex items-center gap-2 text-[11px] px-2 py-0.5 rounded-full bg-white/60 border border-slate-300/60 text-slate-700">
+            <i data-lucide="user" class="w-3.5 h-3.5"></i>
+            {{ gerente.username if gerente else "-" }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/perfil/{{ pelada.nome | slug }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary-50/80 hover:bg-primary-50 text-primary-700 text-xs font-semibold transition-all">
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        Ver perfil público
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+  <div class="rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 p-3.5">
+    <div class="text-[10px] text-slate-500 mb-0.5 font-medium">Jogadores</div>
+    <div class="text-xl font-medium text-slate-900">{{ estatisticas.total_jogadores if estatisticas else 0 }}</div>
+  </div>
+  <div class="rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 p-3.5">
+    <div class="text-[10px] text-slate-500 mb-0.5 font-medium">Temporadas</div>
+    <div class="text-xl font-medium text-slate-900">{{ estatisticas.total_temporadas if estatisticas else 0 }}</div>
+  </div>
+  <div class="rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 p-3.5">
+    <div class="text-[10px] text-slate-500 mb-0.5 font-medium">Rodadas</div>
+    <div class="text-xl font-medium text-slate-900">{{ estatisticas.rodadas_realizadas if estatisticas else 0 }}</div>
+  </div>
+  <div class="rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 p-3.5">
+    <div class="text-[10px] text-slate-500 mb-0.5 font-medium">Partidas</div>
+    <div class="text-xl font-medium text-slate-900">{{ estatisticas.partidas_realizadas if estatisticas else 0 }}</div>
+  </div>
+</div>
+
+<div class="grid lg:grid-cols-2 gap-6">
+  <!-- Ações rápidas -->
+  {% call card("Ações rápidas", "Gerencie sua pelada", "zap", "blue") %}
+  <div class="grid grid-cols-2 gap-3">
+    <a class="group text-sm font-medium rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border px-5 py-4 transition-all text-center flex flex-col items-center gap-2" href="/peladas/{{pelada.id}}/edit">
+      <i data-lucide="pencil" class="w-5 h-5 text-slate-600"></i>
+      <span class="text-slate-900">Editar</span>
+    </a>
+    <a class="group text-sm font-medium rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border px-5 py-4 transition-all text-center flex flex-col items-center gap-2" href="/peladas/{{pelada.id}}/jogadores">
+      <i data-lucide="users" class="w-5 h-5 text-slate-600"></i>
+      <span class="text-slate-900">Jogadores</span>
+    </a>
+    <a class="group text-sm font-medium rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border px-5 py-4 transition-all text-center flex flex-col items-center gap-2 col-span-2" href="/peladas/{{pelada.id}}/temporadas">
+      <i data-lucide="calendar" class="w-5 h-5 text-slate-600"></i>
+      <span class="text-slate-900">Temporadas</span>
+    </a>
+  </div>
+  {% endcall %}
+
+  <!-- Temporada ativa -->
+  {% call card("Temporada ativa", "Acesso rápido", "trophy", "green") %}
+    {% if temporada_ativa %}
+      <div class="mb-4 p-4 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60">
+        <div class="text-sm font-semibold text-slate-900 mb-1">{{ temporada_ativa.inicio_mes | data_br if temporada_ativa.inicio_mes else "—" }} → {{ temporada_ativa.fim_mes | data_br if temporada_ativa.fim_mes else "—" }}</div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex items-center gap-2 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50/70 border border-emerald-300/60 text-emerald-700">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            Ativa
+          </span>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <a class="group text-xs font-medium rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border px-4 py-3 transition-all text-center" href="/temporadas/{{temporada_ativa.id}}">
+          <div class="w-9 h-9 mx-auto rounded-lg bg-white/60 border border-slate-300/60 grid place-items-center text-slate-600 mb-2">
+            <i data-lucide="layout-grid" class="w-4 h-4"></i>
+          </div>
+          <div class="text-slate-900">Detalhes</div>
+        </a>
+        <a class="group text-xs font-medium rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border px-4 py-3 transition-all text-center" href="/temporadas/{{temporada_ativa.id}}/rodadas">
+          <div class="w-9 h-9 mx-auto rounded-lg bg-white/60 border border-slate-300/60 grid place-items-center text-slate-600 mb-2">
+            <i data-lucide="trophy" class="w-4 h-4"></i>
+          </div>
+          <div class="text-slate-900">Rodadas</div>
+        </a>
+        <a class="group text-xs font-medium rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border px-4 py-3 transition-all text-center" href="/temporadas/{{temporada_ativa.id}}/ranking">
+          <div class="w-9 h-9 mx-auto rounded-lg bg-white/60 border border-slate-300/60 grid place-items-center text-slate-600 mb-2">
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          </div>
+          <div class="text-slate-900">Rankings</div>
+        </a>
+      </div>
+    {% else %}
+      <div class="text-center py-12">
+        <div class="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-lg bg-slate-50/70 border border-slate-300/60 text-slate-500">
+          <i data-lucide="calendar" class="w-6 h-6"></i>
+        </div>
+        <div class="text-sm font-semibold text-slate-800 mb-1">Nenhuma temporada ativa</div>
+        <div class="text-xs text-slate-600">Crie uma temporada para começar.</div>
+      </div>
+    {% endif %}
+  {% endcall %}
+</div>
+{% endblock %}

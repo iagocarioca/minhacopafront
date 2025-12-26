@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}EFootBool{% endblock %}</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'primary': {
+              DEFAULT: '#3B82F6',
+              50: '#EFF6FF',
+              100: '#DBEAFE',
+              200: '#BFDBFE',
+              300: '#93C5FD',
+              400: '#60A5FA',
+              500: '#3B82F6',
+              600: '#2563EB',
+              700: '#1D4ED8',
+              800: '#1E40AF',
+              900: '#1E3A8A',
+            },
+            'coral': {
+              DEFAULT: '#FF6B6B',
+              50: '#FFE5E5',
+              100: '#FFD1D1',
+              200: '#FFA8A8',
+              300: '#FF8080',
+              400: '#FF7575',
+              500: '#FF6B6B',
+              600: '#FF5252',
+              700: '#FF3838',
+              800: '#FF1F1F',
+              900: '#E60000',
+            },
+            'purple-accent': {
+              DEFAULT: '#8B5CF6',
+              50: '#F5F3FF',
+              100: '#EDE9FE',
+              200: '#DDD6FE',
+              300: '#C4B5FD',
+              400: '#A78BFA',
+              500: '#8B5CF6',
+              600: '#7C3AED',
+              700: '#6D28D9',
+              800: '#5B21B6',
+              900: '#4C1D95',
+            },
+          },
+          boxShadow: {
+            'soft': '0 8px 30px rgba(15, 23, 42, 0.10)',
+            'card': '0 10px 40px rgba(15, 23, 42, 0.10)',
+            'card-hover': '0 14px 55px rgba(15, 23, 42, 0.14)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Tipografia e animações (UX minimalista refinado) */
+    body {
+      font-feature-settings: "ss01" 1, "cv02" 1;
+      letter-spacing: -0.011em;
+      /* Cinza claro uniforme (estilo iOS/Apple) */
+      background: #F5F5F7;
+    }
+    
+    /* Animação suave */
+    .transition-all {
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Hover suave (sem elevação, apenas border/bg) */
+    .card-hover {
+      transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      border-color: rgba(59, 130, 246, 0.35);
+      background: rgba(255, 255, 255, 0.35);
+    }
+    
+    /* Scrollbar minimalista */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.12);
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.20);
+    }
+
+    /* Safe-area (iOS) */
+    :root {
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+  </style>
+</head>
+
+{% set _pelada_id = pelada_id if pelada_id is defined else (pelada.id if pelada is defined and pelada and pelada.id is defined else None) %}
+{% set _temporada_id = temporada_id if temporada_id is defined else (temporada.id if temporada is defined and temporada and temporada.id is defined else None) %}
+{% set _rodada_id = rodada_id if rodada_id is defined else (rodada.id if rodada is defined and rodada and rodada.id is defined else None) %}
+
+<body class="min-h-screen text-slate-900 antialiased text-[13px] sm:text-sm">
+  <!-- Mobile overlay (sidebar) -->
+  <div id="overlay" class="fixed inset-0 bg-slate-900/30 backdrop-blur-sm hidden z-40"></div>
+
+  <div class="min-h-screen lg:grid lg:grid-cols-12">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed lg:static z-50 lg:z-auto inset-y-0 left-0 w-[280px] lg:w-auto
+         bg-white/30 backdrop-blur-2xl border-r border-slate-300/40
+         shadow-none -translate-x-full lg:translate-x-0 transition-transform duration-300
+         lg:col-span-3 xl:col-span-2">
+      <div class="h-full flex flex-col">
+        <div class="px-5 py-5 border-b border-slate-300/40 bg-transparent">
+          <a href="/peladas" class="flex items-center gap-3 group">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-500 to-purple-accent-500 shadow-soft grid place-items-center transition-transform group-hover:scale-105">
+              <i data-lucide="soccer-ball" class="w-5 h-5 text-white"></i>
+            </div>
+            <div class="leading-tight">
+              <p class="font-bold text-sm text-slate-900">EFootBool</p>
+              <p class="text-[11px] text-slate-500">Futebol • Painel</p>
+            </div>
+          </a>
+        </div>
+
+        <nav class="px-4 py-5 flex-1 overflow-auto bg-transparent">
+          <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Menu</p>
+
+          <a class="group flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+            {% if request.path.startswith('/peladas') and not request.path.endswith('/jogadores') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+            href="/peladas">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-purple-accent-500 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-white"></i>
+            </div>
+            <span class="text-sm font-semibold {% if request.path.startswith('/peladas') and not request.path.endswith('/jogadores') %}text-slate-900{% else %}text-slate-700{% endif %}">Peladas</span>
+          </a>
+
+          {% if _pelada_id %}
+            <a class="group mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+              {% if request.path.startswith('/peladas/' ~ _pelada_id ~ '/jogadores') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+              href="/peladas/{{_pelada_id}}/jogadores">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-600 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+                <i data-lucide="users" class="w-4 h-4 text-white"></i>
+              </div>
+              <span class="text-sm font-semibold {% if request.path.startswith('/peladas/' ~ _pelada_id ~ '/jogadores') %}text-slate-900{% else %}text-slate-700{% endif %}">Jogadores</span>
+            </a>
+            <a class="group mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+              {% if request.path.startswith('/peladas/' ~ _pelada_id ~ '/temporadas') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+              href="/peladas/{{_pelada_id}}/temporadas">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+                <i data-lucide="calendar" class="w-4 h-4 text-white"></i>
+              </div>
+              <span class="text-sm font-semibold {% if request.path.startswith('/peladas/' ~ _pelada_id ~ '/temporadas') %}text-slate-900{% else %}text-slate-700{% endif %}">Temporadas</span>
+            </a>
+          {% endif %}
+
+          {% if _temporada_id %}
+            <div class="my-5 mx-4 border-t border-slate-200"></div>
+            <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Temporada</p>
+            <a class="group flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+              {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/times') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+              href="/temporadas/{{_temporada_id}}/times">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+                <i data-lucide="shirt" class="w-4 h-4 text-white"></i>
+              </div>
+              <span class="text-sm font-semibold {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/times') %}text-slate-900{% else %}text-slate-700{% endif %}">Times</span>
+            </a>
+            <a class="group mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+              {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/rodadas') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+              href="/temporadas/{{_temporada_id}}/rodadas">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-accent-500 to-purple-accent-600 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+                <i data-lucide="trophy" class="w-4 h-4 text-white"></i>
+              </div>
+              <span class="text-sm font-semibold {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/rodadas') %}text-slate-900{% else %}text-slate-700{% endif %}">Rodadas</span>
+            </a>
+            <a class="group mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+              {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/ranking') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+              href="/temporadas/{{_temporada_id}}/ranking">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+                <i data-lucide="bar-chart-3" class="w-4 h-4 text-white"></i>
+              </div>
+              <span class="text-sm font-semibold {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/ranking') %}text-slate-900{% else %}text-slate-700{% endif %}">Rankings</span>
+            </a>
+          {% endif %}
+
+          {% if _rodada_id %}
+            <div class="my-5 mx-4 border-t border-slate-200"></div>
+            <p class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-3">Rodada</p>
+            <a class="group flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+              {% if request.path.startswith('/rodadas/' ~ _rodada_id ~ '/partidas') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+              href="/rodadas/{{_rodada_id}}/partidas">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-purple-accent-500 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+                <i data-lucide="swords" class="w-4 h-4 text-white"></i>
+              </div>
+              <span class="text-sm font-semibold {% if request.path.startswith('/rodadas/' ~ _rodada_id ~ '/partidas') %}text-slate-900{% else %}text-slate-700{% endif %}">Partidas</span>
+            </a>
+            <a class="group mt-2 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all
+              {% if request.path.startswith('/rodadas/' ~ _rodada_id ~ '/votacoes') %}bg-slate-100 ring-1 ring-slate-200{% endif %}" 
+              href="/rodadas/{{_rodada_id}}/votacoes">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-purple-accent-500 shadow-soft grid place-items-center group-hover:scale-105 transition-transform">
+                <i data-lucide="vote" class="w-4 h-4 text-white"></i>
+              </div>
+              <span class="text-sm font-semibold {% if request.path.startswith('/rodadas/' ~ _rodada_id ~ '/votacoes') %}text-slate-900{% else %}text-slate-700{% endif %}">Votações</span>
+            </a>
+          {% endif %}
+
+          <div class="my-5 mx-4 border-t border-slate-200"></div>
+          <a class="group flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-slate-100 transition-all" href="/logout">
+            <div class="w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 grid place-items-center group-hover:bg-slate-100 transition-colors">
+              <i data-lucide="log-out" class="w-4 h-4 text-slate-500"></i>
+            </div>
+            <span class="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Sair</span>
+          </a>
+        </nav>
+
+        <div class="px-5 py-5 border-t border-slate-200/70 bg-transparent">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-primary-500 to-purple-accent-500 shadow-soft grid place-items-center">
+              <span class="text-white font-bold text-sm">{{ (gerente.username[0] if gerente and gerente.username is defined else "U") | upper }}</span>
+            </div>
+            <div class="leading-tight flex-1 min-w-0">
+              <p class="text-sm font-semibold text-slate-900 truncate">{{ gerente.username if gerente and gerente.username is defined else "Usuário" }}</p>
+              <p class="text-xs text-slate-500">Organizador</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="lg:col-span-9 xl:col-span-10">
+      <header class="sticky top-0 z-30 bg-transparent" style="padding-top: var(--safe-top);">
+        <div class="px-4 sm:px-6 py-3.5 flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <!-- Voltar (mobile app feel) -->
+            <button id="btnBack"
+              class="lg:hidden w-10 h-10 rounded-xl bg-transparent border-0 shadow-none hover:bg-transparent transition-all grid place-items-center"
+              aria-label="Voltar"
+              style="display:none">
+              <i data-lucide="chevron-left" class="w-5 h-5 text-slate-900"></i>
+            </button>
+
+            <button id="btnOpen"
+              class="lg:hidden w-10 h-10 rounded-xl bg-transparent border-0 shadow-none hover:bg-transparent transition-all grid place-items-center"
+              aria-label="Abrir menu">
+              <i data-lucide="menu" class="w-5 h-5 text-slate-900"></i>
+            </button>
+            <div class="leading-tight">
+              <p class="text-[11px] text-slate-500 uppercase tracking-wider font-semibold">{% block breadcrumb %}Painel{% endblock %}</p>
+              <h1 class="text-base sm:text-lg font-bold text-slate-900 mt-0.5">{% block page_title %}EFootBool{% endblock %}</h1>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 sm:gap-3">
+            {% block header_actions %}
+              <a href="/peladas" class="h-10 px-3 rounded-xl bg-gradient-to-r from-primary-500 to-purple-accent-500 hover:from-primary-600 hover:to-purple-accent-600 shadow-soft text-white font-semibold text-sm inline-flex items-center gap-2 transition-all">
+                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Peladas</span>
+              </a>
+            {% endblock %}
+          </div>
+        </div>
+      </header>
+
+      <div class="px-4 sm:px-6 py-4 sm:py-6" style="padding-bottom: calc(16px + var(--safe-bottom));">
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+          {% if msgs %}
+            <div class="space-y-3 mb-8">
+              {% for cat, msg in msgs %}
+                <div class="rounded-xl px-4 py-3 text-sm font-semibold border flex items-center gap-3 bg-transparent
+                  {% if cat == 'ok' %}
+                    border-emerald-300/60 text-emerald-800
+                  {% else %}
+                    border-rose-300/60 text-rose-800
+                  {% endif %}">
+                  <div class="w-8 h-8 rounded-xl grid place-items-center
+                    {% if cat == 'ok' %}bg-emerald-500/10 text-emerald-700{% else %}bg-rose-500/10 text-rose-700{% endif %}">
+                    <i data-lucide="{% if cat == 'ok' %}check-circle{% else %}alert-circle{% endif %}" class="w-4 h-4"></i>
+                  </div>
+                  <span class="flex-1">{{ msg }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <main>
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function lucideRefresh() {
+      try { window.lucide && window.lucide.createIcons(); } catch(e) {}
+    }
+
+    lucideRefresh();
+    document.body.addEventListener('htmx:load', lucideRefresh);
+    document.body.addEventListener('htmx:afterSwap', lucideRefresh);
+
+    // Sidebar (mobile)
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("overlay");
+    const btnOpen = document.getElementById("btnOpen");
+    const btnBack = document.getElementById("btnBack");
+
+    // Back button (mobile app feel)
+    function canGoBack() {
+      if (window.history.length > 1) return true;
+      try {
+        if (document.referrer && new URL(document.referrer).host === window.location.host) return true;
+      } catch (e) {}
+      return false;
+    }
+    function refreshBackButton() {
+      if (!btnBack) return;
+      btnBack.style.display = canGoBack() ? "" : "none";
+    }
+
+    function openSidebar() {
+      sidebar?.classList.remove("-translate-x-full");
+      overlay?.classList.remove("hidden");
+    }
+    function closeSidebar() {
+      sidebar?.classList.add("-translate-x-full");
+      overlay?.classList.add("hidden");
+    }
+
+    btnOpen?.addEventListener("click", openSidebar);
+    btnBack?.addEventListener("click", () => window.history.back());
+    overlay?.addEventListener("click", closeSidebar);
+    sidebar?.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => {
+        if (window.innerWidth < 1024) closeSidebar();
+      });
+    });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 1024) {
+        overlay?.classList.add("hidden");
+        sidebar?.classList.remove("-translate-x-full");
+      } else {
+        sidebar?.classList.add("-translate-x-full");
+      }
+    });
+
+    refreshBackButton();
+
+    // -----------------------------
+    // Dropdown (shadcn-like) para TODOS os <select>
+    // - abre pra cima por padrão
+    // - mantém <select> no DOM (sr-only) para submit/required/HTMX
+    // - adiciona busca quando tiver muitas opções
+    // -----------------------------
+
+    function ddEscapeHtml(str) {
+      // compat: evita replaceAll / ?? (alguns browsers/webviews quebram)
+      const s = String(str === undefined || str === null ? "" : str);
+      return s
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function ddGetSelectedLabel(sel) {
+      const opts = sel && sel.options ? sel.options : null;
+      const idx = sel ? sel.selectedIndex : -1;
+      const opt = (opts && idx >= 0) ? opts[idx] : null;
+      if (!opt) return "";
+      const txt = opt.textContent || "";
+      return (txt || "").trim();
+    }
+
+    function ddBuildOptionsHTML(sel) {
+      const items = [];
+      const isRequired = !!(sel && sel.required);
+      for (const opt of Array.from(sel.options || [])) {
+        const value = (opt.value === undefined || opt.value === null) ? "" : opt.value;
+        const label = (opt.textContent || "").trim();
+        // IMPORTANTE: disabled precisa ser boolean (string "false" quebra e vira truthy)
+        // Se for required, desabilita placeholder (value="") pra não deixar selecionar inválido
+        const disabled = !!(opt.disabled || (isRequired && String(value) === ""));
+        items.push({ value, label, disabled });
+      }
+      return items;
+    }
+
+    function initSelectDropdowns(root) {
+      const scope = root || document;
+      const selects = Array.from(scope.querySelectorAll("select"))
+        .filter(s => !s.dataset.ddInit)
+        .filter(s => !s.hasAttribute("multiple"))
+        .filter(s => !s.dataset.native); // allow opt-out: data-native="1"
+
+      for (const sel of selects) {
+        sel.dataset.ddInit = "1";
+
+        // Mantém para submit/required/HTMX, mas esconde visualmente (sem depender de classes do Tailwind geradas em runtime)
+        sel.dataset.ddHidden = "1";
+        sel.style.position = "absolute";
+        sel.style.width = "1px";
+        sel.style.height = "1px";
+        sel.style.padding = "0";
+        sel.style.margin = "-1px";
+        sel.style.overflow = "hidden";
+        sel.style.clip = "rect(0,0,0,0)";
+        sel.style.whiteSpace = "nowrap";
+        sel.style.border = "0";
+        sel.style.opacity = "0";
+        // crucial: evita o select interceptar clique (efeito de "overlay")
+        sel.style.pointerEvents = "none";
+
+        // Wrapper
+        const wrapper = document.createElement("div");
+        wrapper.className = "relative";
+
+        // Placeholder: pega do primeiro option vazio, ou label padrão
+        const optionsArr = Array.from(sel.options || []);
+        const hasEmpty = optionsArr.some(o => (o.value || "") === "");
+        let placeholder = "Selecione...";
+        if (hasEmpty) {
+          const emptyOpt = optionsArr.find(o => (o.value || "") === "");
+          const t = emptyOpt && emptyOpt.textContent ? emptyOpt.textContent.trim() : "";
+          placeholder = t || "Selecione...";
+        }
+
+        // Button (trigger)
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = [
+          "w-full h-11 px-4 rounded-xl",
+          "bg-transparent border border-slate-200/80",
+          "hover:bg-white/30 hover:border-slate-300/80",
+          "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40",
+          "transition-all inline-flex items-center justify-between gap-3",
+          "text-sm text-slate-900 cursor-pointer"
+        ].join(" ");
+        // Não espelha disabled do <select> no botão, pois isso bloqueia o clique (cursor de bloqueio).
+        // Se quiser um select realmente nativo/disabled, use data-native="1" no <select>.
+        btn.disabled = false;
+        btn.setAttribute("aria-haspopup", "listbox");
+        btn.setAttribute("aria-expanded", "false");
+
+        // Label text
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "truncate text-left flex-1";
+        const initialLabel = ddGetSelectedLabel(sel) || "";
+        labelSpan.textContent = (sel.value ? initialLabel : placeholder);
+
+        // Chevron
+        const chev = document.createElement("span");
+        chev.className = "flex-shrink-0 opacity-80";
+        chev.innerHTML = '<i data-lucide="chevron-down" class="w-4 h-4"></i>';
+
+        btn.appendChild(labelSpan);
+        btn.appendChild(chev);
+
+        // Panel
+        const panel = document.createElement("div");
+        panel.className = [
+          "absolute left-0 right-0 bottom-full mb-2", // abre pra cima
+          "z-50",
+          "rounded-xl border border-slate-200/80",
+          "bg-transparent backdrop-blur-xl",
+          "shadow-[0_16px_50px_rgba(15,23,42,.18)]",
+          "hidden"
+        ].join(" ");
+
+        // Inner
+        const inner = document.createElement("div");
+        inner.className = "p-2";
+
+        const items = ddBuildOptionsHTML(sel);
+        const enableSearch = items.length >= 10;
+
+        let searchInput = null;
+        if (enableSearch) {
+          const searchWrap = document.createElement("div");
+          searchWrap.className = "p-2";
+          searchWrap.innerHTML = `
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                <i data-lucide="search" class="w-4 h-4"></i>
+              </span>
+              <input type="text" class="w-full h-10 pl-10 pr-3 rounded-lg bg-transparent border border-slate-200/80 text-sm text-slate-900 placeholder-slate-400
+                focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40"
+                placeholder="Buscar..." />
+            </div>
+          `;
+          searchInput = searchWrap.querySelector("input");
+          panel.appendChild(searchWrap);
+        }
+
+        const list = document.createElement("div");
+        list.className = "max-h-60 overflow-auto px-1 pb-1";
+        list.setAttribute("role", "listbox");
+
+        function renderList(filterText) {
+          const q = (filterText || "").trim().toLowerCase();
+          list.innerHTML = "";
+
+          for (const it of items) {
+            if (q && !it.label.toLowerCase().includes(q)) continue;
+
+            const selVal = (sel && sel.value !== undefined && sel.value !== null) ? String(sel.value) : "";
+            const itVal = (it && it.value !== undefined && it.value !== null) ? String(it.value) : "";
+            const isSelected = (selVal === itVal);
+            const isPlaceholder = (String((it && it.value !== undefined && it.value !== null) ? it.value : "") === "");
+
+            const optBtn = document.createElement("button");
+            optBtn.type = "button";
+              optBtn.className = [
+              "w-full text-left px-3 py-2 rounded-lg",
+              "text-sm",
+              "transition-colors",
+                it.disabled ? "opacity-50 cursor-not-allowed" : "hover:bg-white/35",
+                isSelected ? "bg-primary-50 border border-primary-200" : "border border-transparent",
+                isPlaceholder ? "text-slate-500" : "text-slate-900"
+            ].join(" ");
+            optBtn.disabled = !!it.disabled;
+            optBtn.setAttribute("role", "option");
+            optBtn.setAttribute("aria-selected", isSelected ? "true" : "false");
+            optBtn.innerHTML = `
+              <div class="flex items-center justify-between gap-3">
+                <span class="truncate">${ddEscapeHtml(it.label || (isPlaceholder ? placeholder : ""))}</span>
+                ${isSelected ? '<i data-lucide="check" class="w-4 h-4 text-primary-600"></i>' : '<span class="w-4 h-4"></span>'}
+              </div>
+            `;
+
+            optBtn.addEventListener("click", () => {
+              if (it.disabled) return;
+              sel.value = it.value;
+              // dispara eventos para HTMX/validações
+              sel.dispatchEvent(new Event("change", { bubbles: true }));
+              sel.dispatchEvent(new Event("input", { bubbles: true }));
+              labelSpan.textContent = (sel.value ? it.label : placeholder);
+              closePanel();
+              lucideRefresh();
+            });
+
+            list.appendChild(optBtn);
+          }
+          lucideRefresh();
+        }
+
+        renderList("");
+        inner.appendChild(list);
+        panel.appendChild(inner);
+
+        // Monta DOM: troca select por wrapper e coloca select dentro
+        const parent = sel.parentNode;
+        if (parent) parent.insertBefore(wrapper, sel);
+        wrapper.appendChild(sel);
+        wrapper.appendChild(btn);
+        wrapper.appendChild(panel);
+
+        function openPanel() {
+          // posicionamento: prefere top, mas se não tiver espaço, abre embaixo
+          panel.classList.remove("hidden");
+          panel.style.opacity = "0";
+          panel.style.transform = "scale(.98)";
+          panel.style.transformOrigin = "bottom";
+
+          const rect = btn.getBoundingClientRect();
+          const spaceAbove = rect.top;
+          const spaceBelow = window.innerHeight - rect.bottom;
+          const wantTop = true;
+          const enoughAbove = spaceAbove > 220;
+          const shouldOpenBottom = wantTop && !enoughAbove && spaceBelow > spaceAbove;
+
+          if (shouldOpenBottom) {
+            panel.classList.remove("bottom-full", "mb-2");
+            panel.classList.add("top-full", "mt-2");
+            panel.style.transformOrigin = "top";
+          } else {
+            panel.classList.remove("top-full", "mt-2");
+            panel.classList.add("bottom-full", "mb-2");
+            panel.style.transformOrigin = "bottom";
+          }
+
+          btn.setAttribute("aria-expanded", "true");
+          requestAnimationFrame(() => {
+            panel.style.opacity = "1";
+            panel.style.transform = "scale(1)";
+          });
+
+          // foco na busca
+          if (searchInput) {
+            searchInput.value = "";
+            renderList("");
+            setTimeout(() => { try { searchInput.focus(); } catch (e) {} }, 0);
+          }
+
+          // scroll pro selecionado
+          const selected = panel.querySelector('[aria-selected="true"]');
+          if (selected && selected.scrollIntoView) selected.scrollIntoView({ block: "nearest" });
+        }
+
+        function closePanel() {
+          if (panel.classList.contains("hidden")) return;
+          btn.setAttribute("aria-expanded", "false");
+          panel.style.opacity = "0";
+          panel.style.transform = "scale(.98)";
+          setTimeout(() => {
+            panel.classList.add("hidden");
+          }, 90);
+        }
+
+        btn.addEventListener("click", () => {
+          if (panel.classList.contains("hidden")) openPanel();
+          else closePanel();
+        });
+
+        // sync quando valor do select mudar fora (ex: htmx, scripts)
+        sel.addEventListener("change", () => {
+          const txt = ddGetSelectedLabel(sel);
+          labelSpan.textContent = (sel.value ? txt : placeholder);
+          renderList((searchInput && searchInput.value) ? searchInput.value : "");
+        });
+
+        // search filter
+        if (searchInput) {
+          searchInput.addEventListener("input", (e) => {
+            const v = e && e.target ? e.target.value : "";
+            renderList(v || "");
+          });
+        }
+
+        // outside click / esc
+        // IMPORTANTE: usar "click" (não "mousedown") para não cancelar o clique do item antes de aplicar a seleção.
+        document.addEventListener("click", (e) => {
+          if (!wrapper.contains(e.target)) closePanel();
+        });
+        // evita que cliques dentro do painel acabem sendo interpretados como fora em alguns browsers/webviews
+        panel.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+        });
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") closePanel();
+        });
+
+        // initial label
+        labelSpan.textContent = (sel.value ? (ddGetSelectedLabel(sel) || "") : placeholder);
+      }
+    }
+
+    function safeInitSelectDropdowns(root) {
+      try {
+        initSelectDropdowns(root);
+      } catch (err) {
+        // fallback: se der erro de JS, volta pro <select> nativo
+        try {
+          const scope = root || document;
+          const badSelects = Array.from(scope.querySelectorAll("select[data-dd-init='1'], select[data-dd-init=\"1\"]"));
+          badSelects.forEach(s => {
+            try {
+              delete s.dataset.ddInit;
+              delete s.dataset.ddHidden;
+              s.style.pointerEvents = "";
+              s.style.opacity = "";
+              s.style.position = "";
+              s.style.width = "";
+              s.style.height = "";
+              s.style.padding = "";
+              s.style.margin = "";
+              s.style.overflow = "";
+              s.style.clip = "";
+              s.style.whiteSpace = "";
+              s.style.border = "";
+            } catch (e3) {}
+          });
+        } catch (e2) {}
+        console.error("[dropdown] erro ao inicializar", err);
+      }
+    }
+
+    safeInitSelectDropdowns(document);
+    document.body.addEventListener("htmx:afterSwap", (e) => safeInitSelectDropdowns(e.target));
+    document.body.addEventListener("htmx:load", (e) => safeInitSelectDropdowns(e.target));
+    lucideRefresh();
+  </script>
+</body>
+</html>

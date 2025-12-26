@@ -1,0 +1,287 @@
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+{% block breadcrumb %}Pelada{% endblock %}
+{% block page_title %}{{ pelada.nome }}{% endblock %}
+{% block content %}
+
+<!-- Capa de perfil -->
+{% if pelada.perfil_url %}
+  <div class="mb-6 -mx-6 sm:-mx-8 lg:-mx-12">
+    <img src="http://127.0.0.1:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
+  </div>
+{% endif %}
+
+<!-- Header da Pelada -->
+<div class="mb-6">
+  <div class="rounded-md bg-white/60 backdrop-blur-xl p-5">
+    <div class="flex items-center gap-4">
+      {% if pelada.logo_url %}
+        <img src="http://127.0.0.1:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+      {% else %}
+        <div class="w-16 h-16 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 grid place-items-center flex-shrink-0">
+          <i data-lucide="soccer-ball" class="w-8 h-8 text-white"></i>
+        </div>
+      {% endif %}
+      <div class="flex-1 min-w-0">
+        <h1 class="text-xl font-semibold text-slate-900 mb-1.5 truncate">{{ pelada.nome }}</h1>
+        <div class="flex items-center gap-3 flex-wrap">
+          {% if pelada.cidade %}
+            <div class="flex items-center gap-1.5 text-xs text-slate-500">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+              <span>{{ pelada.cidade }}</span>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Temporada Ativa -->
+{% if temporada_ativa %}
+  {% call card("Temporada Atual", (temporada_ativa.inicio_mes | data_br if temporada_ativa.inicio_mes else "—") ~ " → " ~ (temporada_ativa.fim_mes | data_br if temporada_ativa.fim_mes else "—"), "calendar", "green") %}
+    <div class="flex items-center gap-3">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50/80 text-emerald-700 text-xs font-medium">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        Temporada Ativa
+      </span>
+    </div>
+  {% endcall %}
+{% else %}
+  {% call card("Temporada Atual", "Nenhuma temporada ativa no momento", "calendar", "green") %}
+    <div class="text-center py-6">
+      <div class="text-sm text-slate-500">Aguardando nova temporada...</div>
+    </div>
+  {% endcall %}
+{% endif %}
+
+{% if temporada_ativa %}
+  <!-- Rankings com Tabs -->
+  <div class="mt-6">
+    {% call card("Rankings", "Estatísticas da temporada", "bar-chart-3", "blue") %}
+      <!-- Tabs -->
+      <div class="flex items-center gap-2 mb-5 border-b border-slate-200/50">
+        <button onclick="showTab('times')" id="tab-times" class="tab-btn active px-4 py-2 text-xs font-medium text-slate-700 border-b-2 border-primary-500 transition-all">
+          <i data-lucide="trophy" class="w-3.5 h-3.5 inline-block mr-1.5"></i>
+          Times
+        </button>
+        <button onclick="showTab('artilheiros')" id="tab-artilheiros" class="tab-btn px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-all">
+          <i data-lucide="soccer-ball" class="w-3.5 h-3.5 inline-block mr-1.5"></i>
+          Artilheiros
+        </button>
+        <button onclick="showTab('assistencias')" id="tab-assistencias" class="tab-btn px-4 py-2 text-xs font-medium text-slate-500 hover:text-slate-700 border-b-2 border-transparent transition-all">
+          <i data-lucide="target" class="w-3.5 h-3.5 inline-block mr-1.5"></i>
+          Assistências
+        </button>
+      </div>
+
+      <!-- Tab Content: Times -->
+      <div id="content-times" class="tab-content">
+        {% if ranking_times and ranking_times|length %}
+          <div class="space-y-2">
+            {% for item in ranking_times[:10] %}
+              {% set pos = item.posicao if item.posicao is defined else loop.index %}
+              {% set time = item.time if item.time is defined else {} %}
+              {% set pontos = time.pontos if time.pontos is defined else (item.pontos if item.pontos is defined else 0) %}
+              {% set vitorias = time.vitorias if time.vitorias is defined else (item.vitorias if item.vitorias is defined else 0) %}
+              {% set jogos = time.jogos if time.jogos is defined else (item.jogos if item.jogos is defined else 0) %}
+              <div class="rounded-md bg-white/60 backdrop-blur-xl p-3.5 flex items-center gap-3 transition-all hover:bg-white/80">
+                <!-- Posição -->
+                <div class="w-9 h-9 rounded-md flex items-center justify-center font-semibold text-sm
+                  {% if pos == 1 %}bg-yellow-100 text-yellow-600
+                  {% elif pos == 2 %}bg-slate-200 text-slate-600
+                  {% elif pos == 3 %}bg-amber-200 text-amber-700
+                  {% else %}bg-slate-100 text-slate-700{% endif %}">
+                  {% if pos == 1 %}🥇{% elif pos == 2 %}🥈{% elif pos == 3 %}🥉{% else %}{{ pos }}{% endif %}
+                </div>
+                
+                <!-- Escudo do Time -->
+                <div class="flex-shrink-0">
+                  {% if time.escudo_url %}
+                    <img src="http://127.0.0.1:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                  {% else %}
+                    <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
+                      <i data-lucide="shirt" class="w-5 h-5 text-white"></i>
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <!-- Info do Time -->
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-slate-900 truncate">{{ time.nome if time.nome else "Time" }}</div>
+                  <div class="text-xs text-slate-500 mt-0.5">
+                    {% if pontos > 0 %}{{ pontos }} pts{% endif %}
+                    {% if jogos > 0 %} • {{ jogos }} jogos{% endif %}
+                    {% if vitorias > 0 %} • {{ vitorias }} vitórias{% endif %}
+                  </div>
+                </div>
+                
+                <!-- Estatísticas -->
+                <div class="text-right">
+                  <div class="text-base font-semibold text-slate-900">{{ pontos }}</div>
+                  <div class="text-[10px] text-slate-500 uppercase">pts</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-8">
+            <div class="text-sm text-slate-500">Nenhum dado de ranking de times ainda.</div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Tab Content: Artilheiros -->
+      <div id="content-artilheiros" class="tab-content hidden">
+        {% if ranking_artilheiros and ranking_artilheiros|length %}
+          <div class="space-y-2">
+            {% for item in ranking_artilheiros[:10] %}
+              {% set pos = item.posicao if item.posicao is defined else loop.index %}
+              {% set jogador = item.jogador if item.jogador is defined else item %}
+              {% set gols = jogador.total_gols if jogador.total_gols is defined else (item.total_gols if item.total_gols is defined else (item.gols if item.gols is defined else 0)) %}
+              <div class="rounded-md bg-white/60 backdrop-blur-xl p-3.5 flex items-center gap-3 transition-all hover:bg-white/80">
+                <!-- Posição -->
+                <div class="w-9 h-9 rounded-md flex items-center justify-center font-semibold text-sm
+                  {% if pos == 1 %}bg-yellow-100 text-yellow-600
+                  {% elif pos == 2 %}bg-slate-200 text-slate-600
+                  {% elif pos == 3 %}bg-amber-200 text-amber-700
+                  {% else %}bg-slate-100 text-slate-700{% endif %}">
+                  {% if pos == 1 %}🥇{% elif pos == 2 %}🥈{% elif pos == 3 %}🥉{% else %}{{ pos }}{% endif %}
+                </div>
+                
+                <!-- Foto do Jogador -->
+                <div class="flex-shrink-0">
+                  {% if jogador.foto_url %}
+                    <img src="http://127.0.0.1:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                  {% else %}
+                    <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
+                      <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <!-- Info do Jogador -->
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-slate-900 truncate">{{ jogador.apelido if jogador.apelido else (jogador.nome_completo if jogador.nome_completo else "Jogador") }}</div>
+                  <div class="text-xs text-slate-500 mt-0.5">
+                    {% if item.time_nome %}{{ item.time_nome }}{% endif %}
+                  </div>
+                </div>
+                
+                <!-- Gols -->
+                <div class="text-right">
+                  <div class="text-base font-semibold text-slate-900">{{ gols }}</div>
+                  <div class="text-[10px] text-slate-500 uppercase">gols</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-8">
+            <div class="text-sm text-slate-500">Nenhum dado de artilheiros ainda.</div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Tab Content: Assistências -->
+      <div id="content-assistencias" class="tab-content hidden">
+        {% if ranking_assistencias and ranking_assistencias|length %}
+          <div class="space-y-2">
+            {% for item in ranking_assistencias[:10] %}
+              {% set pos = item.posicao if item.posicao is defined else loop.index %}
+              {% set jogador = item.jogador if item.jogador is defined else item %}
+              {% set assistencias = jogador.total_assistencias if jogador.total_assistencias is defined else (item.total_assistencias if item.total_assistencias is defined else (item.assistencias if item.assistencias is defined else 0)) %}
+              <div class="rounded-md bg-white/60 backdrop-blur-xl p-3.5 flex items-center gap-3 transition-all hover:bg-white/80">
+                <!-- Posição -->
+                <div class="w-9 h-9 rounded-md flex items-center justify-center font-semibold text-sm
+                  {% if pos == 1 %}bg-yellow-100 text-yellow-600
+                  {% elif pos == 2 %}bg-slate-200 text-slate-600
+                  {% elif pos == 3 %}bg-amber-200 text-amber-700
+                  {% else %}bg-slate-100 text-slate-700{% endif %}">
+                  {% if pos == 1 %}🥇{% elif pos == 2 %}🥈{% elif pos == 3 %}🥉{% else %}{{ pos }}{% endif %}
+                </div>
+                
+                <!-- Foto do Jogador -->
+                <div class="flex-shrink-0">
+                  {% if jogador.foto_url %}
+                    <img src="http://127.0.0.1:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                  {% else %}
+                    <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
+                      <i data-lucide="user" class="w-5 h-5 text-white"></i>
+                    </div>
+                  {% endif %}
+                </div>
+                
+                <!-- Info do Jogador -->
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-slate-900 truncate">{{ jogador.apelido if jogador.apelido else (jogador.nome_completo if jogador.nome_completo else "Jogador") }}</div>
+                  <div class="text-xs text-slate-500 mt-0.5">
+                    {% if item.time_nome %}{{ item.time_nome }}{% endif %}
+                  </div>
+                </div>
+                
+                <!-- Assistências -->
+                <div class="text-right">
+                  <div class="text-base font-semibold text-slate-900">{{ assistencias }}</div>
+                  <div class="text-[10px] text-slate-500 uppercase">assist</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-8">
+            <div class="text-sm text-slate-500">Nenhum dado de assistências ainda.</div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Mensagem se não houver rankings -->
+      {% if not ranking_times and not ranking_artilheiros and not ranking_assistencias %}
+        <div class="text-center py-12">
+          <div class="w-14 h-14 rounded-md bg-slate-50/80 backdrop-blur-xl grid place-items-center mx-auto mb-3 text-slate-400">
+            <i data-lucide="bar-chart-3" class="w-7 h-7 opacity-50"></i>
+          </div>
+          <div class="text-sm text-slate-700 font-medium">Ainda não há dados de ranking</div>
+          <div class="text-xs text-slate-500 mt-1">Os rankings aparecerão aqui quando houver partidas finalizadas.</div>
+        </div>
+      {% endif %}
+    {% endcall %}
+  </div>
+{% endif %}
+
+<script>
+function showTab(tabName) {
+  // Esconde todos os conteúdos
+  document.querySelectorAll('.tab-content').forEach(content => {
+    content.classList.add('hidden');
+  });
+  
+  // Remove active de todas as tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active', 'border-primary-500', 'text-slate-700');
+    btn.classList.add('border-transparent', 'text-slate-500');
+  });
+  
+  // Mostra o conteúdo selecionado
+  const content = document.getElementById('content-' + tabName);
+  if (content) {
+    content.classList.remove('hidden');
+  }
+  
+  // Ativa a tab selecionada
+  const tab = document.getElementById('tab-' + tabName);
+  if (tab) {
+    tab.classList.add('active', 'border-primary-500', 'text-slate-700');
+    tab.classList.remove('border-transparent', 'text-slate-500');
+  }
+}
+
+// Inicializar Lucide icons
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+});
+</script>
+
+{% endblock %}

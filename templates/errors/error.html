@@ -1,0 +1,32 @@
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+{% block breadcrumb %}Erro{% endblock %}
+{% block page_title %}Algo deu errado{% endblock %}
+{% block content %}
+
+{% call card(title or "Erro", subtitle or ("Código " ~ (code or 500)), "alert-triangle", "yellow") %}
+  <div class="space-y-4">
+    <p class="text-sm text-slate-700">
+      {{ message or "Não foi possível concluir sua ação agora." }}
+    </p>
+
+    {% if details %}
+      <div class="rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl p-3 text-xs text-slate-600">
+        {{ details }}
+      </div>
+    {% endif %}
+
+    <div class="grid grid-cols-2 gap-2">
+      <button type="button" onclick="window.history.back()" class="h-11 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        Voltar
+      </button>
+      <a href="/peladas" class="h-11 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
+        <i data-lucide="home" class="w-4 h-4"></i>
+        Início
+      </a>
+    </div>
+  </div>
+{% endcall %}
+
+{% endblock %}
