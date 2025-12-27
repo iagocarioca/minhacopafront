@@ -16,7 +16,7 @@
   {% set j = item.jogador if item.jogador is defined else item %}
   {% set foto_html = '' %}
   {% if j.foto_url %}
-    {% set foto_html = '<img src="http://127.0.0.1:5001' ~ j.foto_url ~ '" alt="' ~ (j.apelido or j.nome_completo) ~ '" class="w-8 h-8 rounded-md object-cover border border-slate-300/60 inline-block mr-2 align-middle" />' %}
+    {% set foto_html = '<img src="http://192.168.18.38:5001' ~ j.foto_url ~ '" alt="' ~ (j.apelido or j.nome_completo) ~ '" class="w-8 h-8 rounded-md object-cover border border-slate-300/60 inline-block mr-2 align-middle" />' %}
   {% else %}
     {% set foto_html = '<div class="w-8 h-8 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center inline-block mr-2 align-middle"><i data-lucide="user" class="w-4 h-4 text-white"></i></div>' %}
   {% endif %}

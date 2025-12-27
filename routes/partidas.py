@@ -40,8 +40,10 @@ def list_create(rodada_id: int):
 @partidas_bp.route("/partidas/<int:partida_id>")
 def detalhe(partida_id: int):
     data = svc.obter_partida(partida_id).get("partida")
+    rodada_id = None
     # enriquecer com times completos (pra ter lista de jogadores nos selects), se possível
     if isinstance(data, dict):
+        rodada_id = data.get("rodada_id")
         casa_id = data.get("time_casa_id") or (data.get("time_casa") or {}).get("id")
         fora_id = data.get("time_fora_id") or (data.get("time_fora") or {}).get("id")
         try:
@@ -51,7 +53,7 @@ def detalhe(partida_id: int):
                 data["time_fora_full"] = time_svc.obter_time(int(fora_id)).get("time")
         except Exception:
             pass
-    return render_template("partidas/detalhe.html", partida=data)
+    return render_template("partidas/detalhe.html", partida=data, rodada_id=rodada_id)
 
 @partidas_bp.route("/partidas/<int:partida_id>/iniciar", methods=["POST"])
 def iniciar(partida_id: int):

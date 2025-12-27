@@ -27,7 +27,7 @@
   {% set t = item.time %}
   {% set escudo_html = '' %}
   {% if t.escudo_url %}
-    {% set escudo_html = '<img src="http://127.0.0.1:5001' ~ t.escudo_url ~ '" alt="' ~ t.nome ~ '" class="w-8 h-8 rounded-md object-cover border border-slate-300/60 inline-block mr-2 align-middle" />' %}
+    {% set escudo_html = '<img src="http://192.168.18.38:5001' ~ t.escudo_url ~ '" alt="' ~ t.nome ~ '" class="w-8 h-8 rounded-md object-cover border border-slate-300/60 inline-block mr-2 align-middle" />' %}
   {% else %}
     {% set escudo_html = '<div class="w-8 h-8 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center inline-block mr-2 align-middle"><i data-lucide="shirt" class="w-4 h-4 text-white"></i></div>' %}
   {% endif %}

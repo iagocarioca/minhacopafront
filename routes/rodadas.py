@@ -58,4 +58,7 @@ def detalhe(rodada_id: int):
     # Garantir que times seja uma lista
     rodada["times"] = times_rodada if isinstance(times_rodada, list) and len(times_rodada) > 0 else []
     
-    return render_template("rodadas/detalhe.html", rodada=rodada)
+    # Extrair temporada_id para navegação
+    temporada_id = rodada.get("temporada_id")
+    
+    return render_template("rodadas/detalhe.html", rodada=rodada, temporada_id=temporada_id)

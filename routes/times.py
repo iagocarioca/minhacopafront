@@ -73,11 +73,13 @@ def detalhe(time_id: int):
 
     # Get pelada_id through temporada relationship
     pelada_id = None
+    temporada_id = None
     jogadores_disponiveis = []
     if isinstance(time, dict) and time.get("temporada_id"):
-        temporada = temp_svc.obter_temporada(time["temporada_id"]).get("temporada", {})
+        temporada_id = time["temporada_id"]
+        temporada = temp_svc.obter_temporada(temporada_id).get("temporada", {})
         pelada_id = temporada.get("pelada_id")
         if pelada_id:
             jogadores_disponiveis = jogador_svc.listar_jogadores(pelada_id, per_page=200).get("data", [])
 
-    return render_template("times/detalhe.html", time=time, jogadores_disponiveis=jogadores_disponiveis)
+    return render_template("times/detalhe.html", time=time, jogadores_disponiveis=jogadores_disponiveis, temporada_id=temporada_id)

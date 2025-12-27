@@ -175,4 +175,4 @@ app = create_app()
 
 if __name__ == "__main__":
     # debug=False para não exibir stacktrace na tela (use FLASK_DEBUG no ambiente se precisar)
-    app.run(debug=True)
+     app.run(host="0.0.0.0", port=5000, debug=True)

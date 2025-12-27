@@ -1,33 +1,40 @@
 {% from "layout/soccer_ball_icon.html" import soccer_ball_icon %}
-{% if partida.gols %}
-  <div class="space-y-3">
-    {% for g in partida.gols %}
-      <div class="rounded-md bg-white/60 backdrop-blur-xl px-4 py-3 flex items-center justify-between gap-3 transition-all">
-        <div class="flex-1">
-          <div class="font-semibold text-slate-900 text-sm">
-            <span class="inline-flex items-center gap-2">
-              {{ soccer_ball_icon("w-4 h-4", "#3B82F6", "flex-shrink-0") }}
-              {% if g.minuto is not none %}{{ g.minuto }}'{% else %}-{% endif %}
-            </span>
-            — {{ (g.jogador.apelido if g.jogador else None) or (g.jogador.nome_completo if g.jogador else None) or "Jogador" }}
-            {% if g.gol_contra %}<span class="text-rose-600 ml-1 text-xs">(GC)</span>{% endif %}
-          </div>
-          {% if g.assistente %}
-            <div class="text-xs text-slate-500 mt-1">Assistência: {{ g.assistente.apelido or g.assistente.nome_completo }}</div>
+{% if partida.gols and partida.gols|length %}
+  {% for g in partida.gols|reverse %}
+    <div class="px-4 py-3 flex items-center gap-3">
+      <div class="flex-shrink-0 w-12 text-center">
+        <span class="text-sm font-semibold text-slate-900">
+          {% if g.minuto is not none %}{{ g.minuto }}'{% else %}-{% endif %}
+        </span>
+      </div>
+      <div class="flex-1">
+        <div class="flex items-center gap-2">
+          {{ soccer_ball_icon("w-4 h-4", "#3B82F6", "flex-shrink-0") }}
+          <span class="text-sm font-medium text-slate-900">
+            {{ (g.jogador.apelido if g.jogador else None) or (g.jogador.nome_completo if g.jogador else None) or "Jogador" }}
+          </span>
+          {% if g.gol_contra %}
+            <span class="text-xs text-rose-600 font-medium">(GC)</span>
           {% endif %}
         </div>
-        {% if partida.status == "em_andamento" %}
-          <form hx-post="/gols/{{g.id}}/delete" hx-target="#placar" hx-swap="outerHTML">
-            <input type="hidden" name="partida_id" value="{{partida.id}}">
-            <button class="h-9 px-4 rounded-md bg-white/80 hover:bg-rose-50 text-xs text-slate-600 hover:text-rose-600 inline-flex items-center gap-2 transition-all">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              Excluir
-            </button>
-          </form>
+        {% if g.assistente %}
+          <div class="text-xs text-slate-500 mt-0.5 ml-6">
+            Assistência: {{ g.assistente.apelido or g.assistente.nome_completo }}
+          </div>
         {% endif %}
       </div>
-    {% endfor %}
-  </div>
+      {% if partida.status == "em_andamento" %}
+        <form hx-post="/gols/{{g.id}}/delete" hx-target="#placar" hx-swap="outerHTML" class="flex-shrink-0">
+          <input type="hidden" name="partida_id" value="{{partida.id}}">
+          <button class="h-8 w-8 rounded-md hover:bg-slate-100 text-slate-400 hover:text-rose-600 inline-flex items-center justify-center transition-all">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </form>
+      {% endif %}
+    </div>
+  {% endfor %}
 {% else %}
-  <div class="text-sm text-slate-400 py-8 text-center">Sem gols ainda.</div>
+  <div class="px-4 py-8 text-center">
+    <div class="text-sm text-slate-400">Sem eventos ainda.</div>
+  </div>
 {% endif %}

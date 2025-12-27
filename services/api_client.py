@@ -1,7 +1,7 @@
 import requests
 from flask import session
 
-API_BASE = "http://127.0.0.1:5001"
+API_BASE = "http://192.168.18.38:5001"
 
 class ApiError(Exception):
     def __init__(self, status_code: int, payload: dict | None = None):

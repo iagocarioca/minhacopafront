@@ -3,8 +3,18 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#10B981" />
   <title>{% block title %}MINHACOPA{% endblock %}</title>
+
+  <!-- Google Fonts - Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -37,9 +47,13 @@
   <style>
     /* UX minimalista refinado (Apple-like) */
     body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       font-feature-settings: "ss01" 1;
       letter-spacing: -0.011em;
       background: #F5F5F7;
+      /* Previne zoom no iOS quando input é focado */
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .border {
@@ -48,6 +62,153 @@
 
     .transition-all {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Melhorias de performance e fluidez */
+    * {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* GPU acceleration para elementos que se movem */
+    aside,
+    header,
+    main {
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+
+    /* Transições mais suaves e rápidas */
+    @media (prefers-reduced-motion: no-preference) {
+      * {
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Transições mais rápidas para melhor responsividade */
+      button,
+      a,
+      .rounded-md,
+      .rounded-lg {
+        transition-duration: 150ms;
+      }
+    }
+
+    /* Scroll suave */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Previne layout shift */
+    img,
+    video {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* Melhorias mobile - tamanhos maiores (sem quebrar layout) */
+    @media (max-width: 768px) {
+      body {
+        font-size: 15px;
+      }
+
+      /* Aumenta min-height de botões mantendo padding original */
+      button,
+      input[type="submit"],
+      input[type="button"] {
+        min-height: 48px;
+        font-size: 16px;
+      }
+
+      /* Aumenta min-height e font-size de inputs mantendo padding original */
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      input[type="tel"],
+      input[type="date"],
+      input[type="time"],
+      textarea,
+      select {
+        min-height: 48px;
+        font-size: 16px !important;
+      }
+
+      /* Texto maior */
+      h1,
+      .text-lg {
+        font-size: 22px;
+        line-height: 1.3;
+      }
+
+      h2,
+      .text-base {
+        font-size: 20px;
+        line-height: 1.3;
+      }
+
+      .text-sm {
+        font-size: 15px;
+      }
+
+      .text-xs {
+        font-size: 13px;
+      }
+
+      /* Ícones maiores - especialmente botões de ação do header */
+      #btnBack [data-lucide] {
+        width: 24px !important;
+        height: 24px !important;
+      }
+
+      /* Ícones em botões e links maiores (exceto header que já tem tamanho específico) */
+      button:not(#btnBack) [data-lucide],
+      a [data-lucide] {
+        width: 20px !important;
+        height: 20px !important;
+      }
+
+      /* Ícones gerais um pouco maiores */
+      [data-lucide]:not(#btnBack [data-lucide]):not(button [data-lucide]):not(a [data-lucide]) {
+        width: 18px !important;
+        height: 18px !important;
+      }
+
+      /* Header mais alto para acomodar botões maiores */
+      header {
+        min-height: 64px;
+      }
+
+      /* Bottom navigation maior e mais espaçado */
+      nav.fixed.bottom-0 {
+        padding-bottom: env(safe-area-inset-bottom, 8px);
+      }
+
+      nav.fixed.bottom-0>div {
+        padding: 10px 8px;
+      }
+
+      nav.fixed.bottom-0 a,
+      nav.fixed.bottom-0 button {
+        min-height: 56px;
+        padding: 10px 12px;
+        gap: 6px;
+      }
+
+      nav.fixed.bottom-0 [data-lucide] {
+        width: 24px !important;
+        height: 24px !important;
+      }
+
+      nav.fixed.bottom-0 span {
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      /* Labels maiores */
+      label {
+        font-size: 14px;
+      }
     }
 
     /* Hover apenas border/bg (sem elevação) - tons verdes */
@@ -74,6 +235,109 @@
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(16, 185, 129, 0.5);
     }
+
+    /* Previne zoom automático no iOS quando input é focado */
+    /* Todos os inputs devem ter font-size >= 16px */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    textarea,
+    select {
+      font-size: 16px !important;
+      /* Remove zoom no iOS Safari */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      /* Melhora legibilidade no mobile */
+      line-height: 1.5;
+    }
+
+    /* Ajusta tamanho do placeholder para manter proporção */
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder,
+    input[type="password"]::placeholder,
+    input[type="number"]::placeholder,
+    input[type="tel"]::placeholder,
+    input[type="url"]::placeholder,
+    input[type="search"]::placeholder,
+    input[type="date"]::placeholder,
+    input[type="time"]::placeholder,
+    textarea::placeholder {
+      font-size: 16px;
+      opacity: 0.6;
+    }
+
+    /* Ajusta select para parecer mais nativo no mobile */
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px;
+      padding-right: 36px;
+    }
+
+    /* Remove highlight azul no iOS */
+    input,
+    textarea,
+    select {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    /* Melhora experiência de toque */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      touch-action: manipulation;
+    }
+
+    /* Melhorias para experiência mobile/app-like */
+    @media (max-width: 768px) {
+
+      /* Previne seleção de texto acidental no mobile */
+      * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      input,
+      textarea,
+      [contenteditable] {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
+
+      /* Previne pull-to-refresh no iOS */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Melhora scroll suave */
+      * {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Ajusta safe area para iPhone X e superiores */
+      body {
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
+    }
   </style>
 </head>
 
@@ -92,8 +356,8 @@ defined else None) %}
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed lg:static z-50 lg:z-auto inset-y-0 left-0 w-[270px] lg:w-auto
          bg-white/30 backdrop-blur-3xl
-         -translate-x-full lg:translate-x-0 transition-transform duration-300
-         lg:col-span-3 xl:col-span-2">
+         -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out
+         lg:col-span-3 xl:col-span-2" style="will-change: transform;">
       <div class="h-full flex flex-col">
         <!-- Logo -->
         <div class="px-4 py-5">
@@ -221,39 +485,34 @@ defined else None) %}
     <!-- Main -->
     <div class="lg:col-span-9 xl:col-span-10">
       <!-- Header (minimalista: sem bordas) -->
-      <header class="sticky top-0 z-30 bg-white/30 backdrop-blur-3xl">
-        <div class="px-4 py-3 flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <!-- Voltar (mobile clean) -->
-            <button id="btnBack" onclick="smartBack()"
-              class="lg:hidden w-9 h-9 rounded-md bg-white/60 backdrop-blur-xl hover:bg-emerald-50/80 hover:border-emerald-200 grid place-items-center transition-all border border-transparent">
-              <i data-lucide="arrow-left" class="w-4 h-4 text-slate-700"></i>
-            </button>
-            <!-- Menu (mobile) -->
-            <button id="btnOpen"
-              class="lg:hidden w-9 h-9 rounded-md bg-white/60 backdrop-blur-xl hover:bg-emerald-50/80 hover:border-emerald-200 grid place-items-center transition-all border border-transparent">
-              <i data-lucide="menu" class="w-4 h-4 text-slate-700"></i>
-            </button>
-            <!-- Breadcrumb -->
-            <div class="hidden sm:block text-xs text-slate-500">
-              {% block breadcrumb %}Painel{% endblock %}
-            </div>
+      <header class="lg:sticky lg:top-0 z-30 bg-white/30 backdrop-blur-3xl">
+        <div class="px-4 py-3 relative">
+          <!-- Voltar (mobile clean) -->
+          <button id="btnBack" onclick="smartBack()"
+            class="lg:hidden absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-md bg-white/60 backdrop-blur-xl hover:bg-emerald-50/80 hover:border-emerald-200 grid place-items-center transition-all border border-transparent z-10">
+            <i data-lucide="arrow-left" class="w-6 h-6 text-slate-700"></i>
+          </button>
+
+          <!-- Breadcrumb (desktop) -->
+          <div class="hidden lg:block text-xs text-slate-500 absolute left-4 top-1/2 -translate-y-1/2">
+            {% block breadcrumb %}Painel{% endblock %}
+          </div>
+
+          <!-- Título centralizado em relação à tela (mobile) / à esquerda (desktop) -->
+          <div class="flex items-center justify-center lg:justify-start lg:ml-0">
+            <h1 class="text-base font-medium text-slate-900 tracking-tight">{% block page_title %}Painel{% endblock %}
+            </h1>
           </div>
 
           <!-- Action (se precisar) -->
-          <div class="hidden md:block">
+          <div class="hidden md:block absolute right-4 top-1/2 -translate-y-1/2">
             {% block header_action %}{% endblock %}
           </div>
         </div>
       </header>
 
       <!-- Content -->
-      <main class="p-4 sm:p-6 pb-20 lg:pb-6">
-        <!-- Page Title -->
-        <div class="mb-5">
-          <h1 class="text-lg font-semibold text-slate-900 tracking-tight">{% block page_title %}Painel{% endblock %}
-          </h1>
-        </div>
+      <main class="p-4 sm:p-6 pb-24 lg:pb-6">
 
         <!-- Flash Messages -->
         {% with msgs = get_flashed_messages(with_categories=true) %}
@@ -287,48 +546,70 @@ defined else None) %}
   </div>
 
   <!-- Bottom Navigation (Mobile) -->
-  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-2xl border-t border-slate-200/60 lg:hidden">
+  <nav
+    class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-2xl border-t border-slate-200/60 lg:hidden safe-area-bottom">
     <div class="flex items-center justify-around px-2 py-2">
+      <!-- Peladas (sempre visível) -->
       <a href="/peladas"
-        class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-md transition-all
-        {% if request.path.startswith('/peladas') and not request.path.endswith('/jogadores') %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
-        <i data-lucide="layout-grid" class="w-5 h-5"></i>
-        <span class="text-[10px] font-medium">Peladas</span>
+        class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all
+        {% if request.path == '/peladas' or (request.path.startswith('/peladas') and not '/jogadores' in request.path and not '/temporadas' in request.path and not '/perfil' in request.path) %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+        <i data-lucide="layout-grid" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Peladas</span>
       </a>
+
+      <!-- Jogadores (se houver pelada) -->
       {% if _pelada_id %}
       <a href="/peladas/{{_pelada_id}}/jogadores"
-        class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-md transition-all
-          {% if request.path.startswith('/peladas/' ~ _pelada_id ~ '/jogadores') %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
-        <i data-lucide="users" class="w-5 h-5"></i>
-        <span class="text-[10px] font-medium">Jogadores</span>
+        class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all
+          {% if '/jogadores' in request.path %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+        <i data-lucide="users" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Jogadores</span>
       </a>
-      <a href="/peladas/{{_pelada_id}}/temporadas"
-        class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-md transition-all
-          {% if request.path.startswith('/peladas/' ~ _pelada_id ~ '/temporadas') %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
-        <i data-lucide="calendar" class="w-5 h-5"></i>
-        <span class="text-[10px] font-medium">Temporadas</span>
+      {% else %}
+      <a href="/peladas"
+        class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all text-slate-400 opacity-50">
+        <i data-lucide="users" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Jogadores</span>
       </a>
       {% endif %}
+
+      <!-- Partidas (se houver rodada) -->
+      {% if _rodada_id %}
+      <a href="/rodadas/{{_rodada_id}}/partidas"
+        class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all
+          {% if '/partidas' in request.path %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+        <i data-lucide="swords" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Partidas</span>
+      </a>
+      {% else %}
+      <a href="/peladas"
+        class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all text-slate-400 opacity-50">
+        <i data-lucide="swords" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Partidas</span>
+      </a>
+      {% endif %}
+
+      <!-- Rankings (se houver temporada) -->
       {% if _temporada_id %}
-      <a href="/temporadas/{{_temporada_id}}/times"
-        class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-md transition-all
-          {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/times') %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
-        <i data-lucide="shirt" class="w-5 h-5"></i>
-        <span class="text-[10px] font-medium">Times</span>
+      <a href="/temporadas/{{_temporada_id}}/ranking" class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all
+          {% if '/ranking' in request.path %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
+        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Rankings</span>
       </a>
-      <a href="/temporadas/{{_temporada_id}}/rodadas"
-        class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-md transition-all
-          {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/rodadas') %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
-        <i data-lucide="trophy" class="w-5 h-5"></i>
-        <span class="text-[10px] font-medium">Rodadas</span>
-      </a>
-      <a href="/temporadas/{{_temporada_id}}/ranking"
-        class="flex flex-col items-center justify-center gap-1 px-4 py-2 rounded-md transition-all
-          {% if request.path.startswith('/temporadas/' ~ _temporada_id ~ '/ranking') %}text-emerald-600{% else %}text-slate-500 hover:text-slate-700{% endif %}">
-        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-        <span class="text-[10px] font-medium">Rankings</span>
+      {% else %}
+      <a href="/peladas"
+        class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all text-slate-400 opacity-50">
+        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Rankings</span>
       </a>
       {% endif %}
+
+      <!-- Menu (sempre visível) -->
+      <button onclick="openSidebar()"
+        class="flex flex-col items-center justify-center gap-1 px-3 py-2 rounded-md transition-all text-slate-500 hover:text-slate-700">
+        <i data-lucide="menu" class="w-6 h-6"></i>
+        <span class="text-[11px] font-medium">Menu</span>
+      </button>
     </div>
   </nav>
 
@@ -338,70 +619,109 @@ defined else None) %}
     let initialUrl = window.location.href;
     let lastDifferentUrl = document.referrer || '/peladas';
 
-    // Função para voltar inteligentemente, ignorando atualizações HTMX
+    // Função para voltar seguindo o fluxo hierárquico da aplicação
     function smartBack() {
       const currentPath = window.location.pathname;
-      const currentUrl = window.location.href;
-
-      // Primeiro, tenta usar o referrer se for válido e diferente
-      if (document.referrer) {
-        const referrerPath = new URL(document.referrer).pathname;
-        // Se o referrer é diferente da página atual, usa ele
-        if (referrerPath !== currentPath && !referrerPath.includes(currentPath)) {
-          window.location.href = document.referrer;
-          return;
-        }
-      }
-
-      // Se o referrer não serve, usa navegação baseada na estrutura de rotas
       let targetUrl = '/peladas'; // URL padrão
 
-      // Navegação hierárquica baseada em rotas
-      if (currentPath.startsWith('/rodadas/') && (currentPath.includes('/partidas') || currentPath.includes('/votacoes'))) {
-        // Se está em partidas ou votações de uma rodada, volta para a rodada
-        const rodadaId = currentPath.match(/\/rodadas\/(\d+)/);
-        if (rodadaId) {
-          targetUrl = `/rodadas/${rodadaId[1]}`;
-        }
-      } else if (currentPath.match(/^\/rodadas\/\d+$/)) {
-        // Se está na página de detalhe de uma rodada, volta para rodadas da temporada
-        // (precisaria da temporada_id, mas por enquanto volta para peladas)
-        targetUrl = '/peladas';
-      } else if (currentPath.startsWith('/temporadas/') && (currentPath.includes('/times') || currentPath.includes('/rodadas') || currentPath.includes('/ranking'))) {
-        // Se está em times, rodadas ou ranking de uma temporada, volta para temporadas
-        const temporadaId = currentPath.match(/\/temporadas\/(\d+)/);
-        if (temporadaId) {
-          const peladaMatch = currentPath.match(/\/peladas\/(\d+)/);
-          if (peladaMatch) {
-            targetUrl = `/peladas/${peladaMatch[1]}/temporadas`;
-          } else {
-            targetUrl = '/peladas';
+      // 1. Detalhe de partida → Lista de partidas da rodada
+      if (currentPath.match(/^\/partidas\/\d+$/)) {
+        const rodadaIdElement = document.querySelector('[data-rodada-id]');
+        if (rodadaIdElement) {
+          const rodadaId = rodadaIdElement.getAttribute('data-rodada-id');
+          if (rodadaId) {
+            targetUrl = `/rodadas/${rodadaId}/partidas`;
           }
         }
-      } else if (currentPath.startsWith('/peladas/') && (currentPath.includes('/jogadores') || currentPath.includes('/temporadas'))) {
-        // Se está em jogadores ou temporadas de uma pelada, volta para peladas
+      }
+      // 2. Lista de partidas → Detalhe da rodada
+      else if (currentPath.match(/^\/rodadas\/\d+\/partidas$/)) {
+        const rodadaId = currentPath.match(/\/rodadas\/(\d+)/)[1];
+        targetUrl = `/rodadas/${rodadaId}`;
+      }
+      // 3. Votações da rodada → Detalhe da rodada
+      else if (currentPath.match(/^\/rodadas\/\d+\/votacoes/)) {
+        const rodadaId = currentPath.match(/\/rodadas\/(\d+)/)[1];
+        targetUrl = `/rodadas/${rodadaId}`;
+      }
+      // 4. Detalhe da rodada → Lista de rodadas da temporada
+      else if (currentPath.match(/^\/rodadas\/\d+$/)) {
+        const temporadaIdElement = document.querySelector('[data-temporada-id]');
+        if (temporadaIdElement) {
+          const temporadaId = temporadaIdElement.getAttribute('data-temporada-id');
+          if (temporadaId) {
+            targetUrl = `/temporadas/${temporadaId}/rodadas`;
+          }
+        }
+      }
+      // 5. Lista de rodadas → Detalhe da temporada
+      else if (currentPath.match(/^\/temporadas\/\d+\/rodadas$/)) {
+        const temporadaId = currentPath.match(/\/temporadas\/(\d+)/)[1];
+        targetUrl = `/temporadas/${temporadaId}`;
+      }
+      // 6. Lista de times → Detalhe da temporada
+      else if (currentPath.match(/^\/temporadas\/\d+\/times$/)) {
+        const temporadaId = currentPath.match(/\/temporadas\/(\d+)/)[1];
+        targetUrl = `/temporadas/${temporadaId}`;
+      }
+      // 7. Rankings → Detalhe da temporada
+      else if (currentPath.match(/^\/temporadas\/\d+\/ranking/)) {
+        const temporadaId = currentPath.match(/\/temporadas\/(\d+)/)[1];
+        targetUrl = `/temporadas/${temporadaId}`;
+      }
+      // 8. Detalhe da temporada → Lista de temporadas da pelada
+      else if (currentPath.match(/^\/temporadas\/\d+$/)) {
+        const peladaIdElement = document.querySelector('[data-pelada-id]');
+        if (peladaIdElement) {
+          const peladaId = peladaIdElement.getAttribute('data-pelada-id');
+          if (peladaId) {
+            targetUrl = `/peladas/${peladaId}/temporadas`;
+          }
+        }
+      }
+      // 9. Lista de temporadas → Perfil da pelada
+      else if (currentPath.match(/^\/peladas\/\d+\/temporadas$/)) {
+        const peladaId = currentPath.match(/\/peladas\/(\d+)/)[1];
+        targetUrl = `/peladas/${peladaId}`;
+      }
+      // 10. Lista de jogadores → Perfil da pelada
+      else if (currentPath.match(/^\/peladas\/\d+\/jogadores$/)) {
+        const peladaId = currentPath.match(/\/peladas\/(\d+)/)[1];
+        targetUrl = `/peladas/${peladaId}`;
+      }
+      // 11. Editar jogador → Lista de jogadores
+      else if (currentPath.match(/^\/jogadores\/\d+\/edit$/)) {
+        const peladaIdElement = document.querySelector('[data-pelada-id]');
+        if (peladaIdElement) {
+          const peladaId = peladaIdElement.getAttribute('data-pelada-id');
+          if (peladaId) {
+            targetUrl = `/peladas/${peladaId}/jogadores`;
+          }
+        }
+      }
+      // 12. Detalhe do time → Lista de times da temporada
+      else if (currentPath.match(/^\/times\/\d+$/)) {
+        const temporadaIdElement = document.querySelector('[data-temporada-id]');
+        if (temporadaIdElement) {
+          const temporadaId = temporadaIdElement.getAttribute('data-temporada-id');
+          if (temporadaId) {
+            targetUrl = `/temporadas/${temporadaId}/times`;
+          }
+        }
+      }
+      // 13. Perfil da pelada → Lista de peladas
+      else if (currentPath.match(/^\/peladas\/\d+$/)) {
         targetUrl = '/peladas';
-      } else if (currentPath.startsWith('/times/')) {
-        // Se está em um time, tenta voltar para times da temporada
-        // (precisaria da temporada_id, mas por enquanto volta para peladas)
-        targetUrl = '/peladas';
-      } else if (currentPath.startsWith('/partidas/')) {
-        // Se está em uma partida, volta para partidas da rodada
-        // (precisaria da rodada_id, mas por enquanto volta para peladas)
-        targetUrl = '/peladas';
-      } else if (currentPath.startsWith('/jogadores/') && currentPath.includes('/edit')) {
-        // Se está editando um jogador, volta para jogadores da pelada
-        targetUrl = '/peladas';
-      } else if (currentPath === '/peladas') {
-        // Se já está em peladas, não faz nada (ou poderia ir para home)
+      }
+      // 14. Se já está na lista de peladas, não faz nada
+      else if (currentPath === '/peladas') {
         return;
       }
 
-      // Navega para a URL de destino
-      if (targetUrl !== currentPath) {
+      if (targetUrl && targetUrl !== currentPath) {
         window.location.href = targetUrl;
       } else {
-        // Se não conseguiu determinar uma URL diferente, tenta history.back() uma vez
+        // Fallback: tenta usar history.back() se não conseguiu determinar a rota
         history.back();
       }
     }
@@ -428,22 +748,44 @@ defined else None) %}
       try { window.lucide && window.lucide.createIcons(); } catch (e) { }
     });
 
-    // Mobile sidebar toggle
+    // Mobile sidebar toggle (otimizado para performance)
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('overlay');
-    const btnOpen = document.getElementById('btnOpen');
     const btnClose = document.getElementById('btnClose');
 
-    if (btnOpen) {
-      btnOpen.addEventListener('click', () => {
-        sidebar.classList.remove('-translate-x-full');
+    window.openSidebar = function () {
+      if (!sidebar || !overlay) return;
+      requestAnimationFrame(() => {
         overlay.classList.remove('hidden');
+        sidebar.classList.remove('-translate-x-full');
+      });
+    };
+
+    function closeSidebar() {
+      if (!sidebar || !overlay) return;
+      requestAnimationFrame(() => {
+        sidebar.classList.add('-translate-x-full');
+        setTimeout(() => {
+          overlay.classList.add('hidden');
+        }, 200); // Aguarda animação terminar
       });
     }
+
     if (overlay) {
-      overlay.addEventListener('click', () => {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
+      overlay.addEventListener('click', closeSidebar, { passive: true });
+    }
+    if (btnClose) {
+      btnClose.addEventListener('click', closeSidebar, { passive: true });
+    }
+
+    // Fecha sidebar ao clicar em links (mobile)
+    if (sidebar) {
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth < 1024) {
+            closeSidebar();
+          }
+        }, { passive: true });
       });
     }
 

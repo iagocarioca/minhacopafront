@@ -57,4 +57,6 @@ def edit(jogador_id: int):
             flash(e.payload.get("erro","Erro ao atualizar"), "error")
 
     data = svc.obter_jogador(jogador_id)
-    return render_template("jogadores/edit.html", jogador=data.get("jogador"))
+    jogador = data.get("jogador", {})
+    pelada_id = jogador.get("pelada_id")
+    return render_template("jogadores/edit.html", jogador=jogador, pelada_id=pelada_id)

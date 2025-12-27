@@ -3,12 +3,19 @@
 {% block breadcrumb %}Rodada{% endblock %}
 {% block page_title %}Rodada{% endblock %}
 {% block content %}
+{% if temporada_id %}<div data-temporada-id="{{ temporada_id }}" class="hidden"></div>{% endif %}
 <!-- Header -->
 <div class="mb-6">
   <h2 class="text-lg font-semibold text-slate-900 mb-1 inline-flex items-center gap-2">
-    <i data-lucide="calendar" class="w-5 h-5 text-slate-600"></i>
-    Rodada {{ rodada.data_rodada | data_br if rodada.data_rodada else "—" }}
+    <i data-lucide="trophy" class="w-5 h-5 text-slate-600"></i>
+    Rodada
   </h2>
+  <div class="text-xs text-slate-600 mt-1">
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/80 border border-slate-300/60 text-slate-600">
+      <i data-lucide="calendar" class="w-3 h-3"></i>
+      {{ rodada.data_rodada | data_br if rodada.data_rodada else "—" }}
+    </span>
+  </div>
   <div class="text-sm text-slate-600 flex items-center gap-3">
     <span class="inline-flex items-center gap-2 text-[11px] px-2.5 py-1 rounded-md bg-slate-50/70 border border-slate-300/60 text-slate-700">
       <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>

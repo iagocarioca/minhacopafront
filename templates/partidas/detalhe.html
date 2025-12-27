@@ -1,232 +1,346 @@
 {% extends "layout/base.html" %}
-{% from "layout/card.html" import card %}
 {% from "layout/soccer_ball_icon.html" import soccer_ball_icon %}
 {% block breadcrumb %}Partida{% endblock %}
 {% block page_title %}Detalhes da Partida{% endblock %}
 {% block content %}
+{% set _rodada_id = rodada_id or (partida.rodada_id if partida.rodada_id is defined else (partida.rodada.id if partida.rodada and partida.rodada.id is defined else None)) %}
+{% if _rodada_id %}<div data-rodada-id="{{ _rodada_id }}" class="hidden"></div>{% endif %}
 {% set casa = partida.time_casa_full or partida.time_casa or {} %}
 {% set fora = partida.time_fora_full or partida.time_fora or {} %}
 
 <!-- Placar principal -->
-<div class="mb-6">
+<div class="mb-4">
   <div id="placar">
     {% include "partidas/_placar.html" %}
   </div>
 </div>
 
-<!-- Tabs Navigation -->
-<div class="mb-6">
-  <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-    <button onclick="showPartidaTab('summary')" id="tab-summary" class="tab-partida-btn active px-4 py-2.5 rounded-md text-xs font-medium text-white bg-emerald-500 transition-all whitespace-nowrap">
-      <i data-lucide="file-text" class="w-3.5 h-3.5 inline-block mr-1.5"></i>
-      Resumo
+<!-- Tabs principais (Match, H2H, Standings, News) -->
+<div class="mb-4 border-b border-slate-200">
+  <div class="flex items-center gap-1 overflow-x-auto pb-0 scrollbar-hide">
+    <button onclick="showMainTab('match')" id="main-tab-match" class="main-tab-btn active px-4 py-3 text-sm font-medium text-slate-900 border-b-2 border-blue-500 transition-all whitespace-nowrap">
+      Match
     </button>
-    <button onclick="showPartidaTab('stats')" id="tab-stats" class="tab-partida-btn px-4 py-2.5 rounded-md text-xs font-medium text-slate-600 bg-white/60 backdrop-blur-xl hover:bg-white/80 transition-all whitespace-nowrap">
-      <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 inline-block mr-1.5"></i>
-      Estatísticas
+    <button onclick="showMainTab('h2h')" id="main-tab-h2h" class="main-tab-btn px-4 py-3 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all whitespace-nowrap">
+      H2H
     </button>
-    <button onclick="showPartidaTab('lineups')" id="tab-lineups" class="tab-partida-btn px-4 py-2.5 rounded-md text-xs font-medium text-slate-600 bg-white/60 backdrop-blur-xl hover:bg-white/80 transition-all whitespace-nowrap">
-      <i data-lucide="users" class="w-3.5 h-3.5 inline-block mr-1.5"></i>
-      Escalações
-    </button>
-    <button onclick="showPartidaTab('h2h')" id="tab-h2h" class="tab-partida-btn px-4 py-2.5 rounded-md text-xs font-medium text-slate-600 bg-white/60 backdrop-blur-xl hover:bg-white/80 transition-all whitespace-nowrap">
-      <i data-lucide="git-compare" class="w-3.5 h-3.5 inline-block mr-1.5"></i>
-      Confrontos
+    <button onclick="showMainTab('standings')" id="main-tab-standings" class="main-tab-btn px-4 py-3 text-sm font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all whitespace-nowrap">
+      Standings
     </button>
   </div>
 </div>
 
-<!-- Tab Content: Summary -->
-<div id="content-summary" class="tab-partida-content">
-  <div class="grid lg:grid-cols-2 gap-6">
-    <!-- Registrar gol -->
-    {% call card("Registrar Gol", "Adicione os gols da partida", "target", "blue") %}
-      {% if partida.status == "em_andamento" %}
-      <form
-        hx-post="/partidas/{{partida.id}}/gol"
-        hx-target="#placar"
-        hx-swap="outerHTML"
-        class="space-y-4"
-        id="golForm"
-      >
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-2">Time</label>
-          <select name="time_id" id="timeSelect" class="w-full text-sm px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl text-slate-900">
-            {% if casa.id %}<option value="{{casa.id}}" data-time="casa">{{ casa.nome or "Casa" }}</option>{% endif %}
-            {% if fora.id %}<option value="{{fora.id}}" data-time="fora">{{ fora.nome or "Fora" }}</option>{% endif %}
-          </select>
-        </div>
-
-        {% set jogadores_casa = casa.jogadores or [] %}
-        {% set jogadores_fora = fora.jogadores or [] %}
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-2">Jogador que marcou</label>
-          <select name="jogador_id" id="jogadorSelect" class="w-full text-sm px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl text-slate-900">
-            {% for j in jogadores_casa %}
-              <option value="{{ j.id }}" data-time="casa">{{ j.apelido or j.nome_completo }}</option>
-            {% endfor %}
-            {% for j in jogadores_fora %}
-              <option value="{{ j.id }}" data-time="fora">{{ j.apelido or j.nome_completo }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-700 mb-2">Assistência (opcional)</label>
-          <select name="assistencia_id" id="assistenciaSelect" class="w-full text-sm px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl text-slate-900">
-            <option value="">Sem assistência</option>
-            {% for j in jogadores_casa %}
-              <option value="{{ j.id }}" data-time="casa">{{ j.apelido or j.nome_completo }}</option>
-            {% endfor %}
-            {% for j in jogadores_fora %}
-              <option value="{{ j.id }}" data-time="fora">{{ j.apelido or j.nome_completo }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-2">Minuto</label>
-            <input name="minuto" placeholder="Ex: 15" class="w-full text-sm px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/30" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-2">&nbsp;</label>
-            <label class="flex items-center gap-2 px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl cursor-pointer transition-all">
-              <input type="checkbox" name="gol_contra" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500/30">
-              <span class="text-xs font-semibold text-slate-700">Gol contra</span>
-            </label>
-          </div>
-        </div>
-
-        <button class="w-full h-12 rounded-md bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2">
-          {{ soccer_ball_icon("w-4 h-4", "white", "") }}
-          Adicionar gol
-        </button>
-      </form>
-      {% else %}
-        <div class="text-center py-12">
-          <div class="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-md bg-slate-50/80 text-slate-400">
-            <i data-lucide="info" class="w-6 h-6"></i>
-          </div>
-          <div class="text-sm text-slate-800 font-semibold">Partida não está em andamento</div>
-          <div class="text-xs text-slate-500 mt-1.5">Inicie a partida para registrar gols.</div>
-        </div>
-      {% endif %}
-    {% endcall %}
-
-    <!-- Timeline -->
-    {% call card("Timeline de Gols", "Histórico da partida", "list", "green") %}
-      <div id="timeline">
-        {% include "partidas/_timeline.html" %}
-      </div>
-    {% endcall %}
-  </div>
-</div>
-
-<!-- Tab Content: Stats -->
-<div id="content-stats" class="tab-partida-content hidden">
-  {% call card("Estatísticas da Partida", "Dados detalhados", "bar-chart-3", "purple") %}
-    <div class="text-center py-12">
-      <div class="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-md bg-purple-50/80 text-purple-400">
-        <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
-      </div>
-      <div class="text-sm text-slate-800 font-semibold">Estatísticas em breve</div>
-      <div class="text-xs text-slate-500 mt-1.5">As estatísticas detalhadas estarão disponíveis em breve.</div>
+<!-- Conteúdo: Match Tab -->
+<div id="main-content-match" class="main-tab-content">
+  <!-- Sub-tabs (Summary, Statistics, Lineup) -->
+  <div class="mb-4">
+    <div class="flex items-center gap-1 overflow-x-auto pb-0 scrollbar-hide">
+      <button onclick="showSubTab('summary')" id="sub-tab-summary" class="sub-tab-btn active px-4 py-2.5 text-xs font-medium text-slate-900 border-b-2 border-blue-500 transition-all whitespace-nowrap">
+        Summary
+      </button>
+      <button onclick="showSubTab('statistics')" id="sub-tab-statistics" class="sub-tab-btn px-4 py-2.5 text-xs font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all whitespace-nowrap">
+        Statistics
+      </button>
+      <button onclick="showSubTab('lineup')" id="sub-tab-lineup" class="sub-tab-btn px-4 py-2.5 text-xs font-medium text-slate-500 border-b-2 border-transparent hover:text-slate-700 transition-all whitespace-nowrap">
+        Lineup
+      </button>
     </div>
-  {% endcall %}
-</div>
+  </div>
 
-<!-- Tab Content: Lineups -->
-<div id="content-lineups" class="tab-partida-content hidden">
-  <div class="grid lg:grid-cols-2 gap-6">
-    {% call card("Escalação - " ~ (casa.nome or "Casa"), "Jogadores do time da casa", "users", "blue") %}
-      {% if casa.jogadores and casa.jogadores|length %}
-        <div class="space-y-2">
-          {% for j in casa.jogadores %}
-            <div class="rounded-md bg-white/60 backdrop-blur-xl p-3 flex items-center gap-3">
-              {% if j.foto_url %}
-                <img src="http://127.0.0.1:5001{{ j.foto_url }}" alt="{{ j.apelido or j.nome_completo }}" class="w-8 h-8 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
-              {% else %}
-                <div class="w-8 h-8 rounded-md bg-emerald-50/80 text-emerald-600 grid place-items-center text-xs font-semibold flex-shrink-0">
-                  {{ loop.index }}
+  <!-- Sub-tab Content: Summary -->
+  <div id="sub-content-summary" class="sub-tab-content">
+    <!-- Timeline de eventos (estilo imagem) -->
+    <div class="mb-6">
+      <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100">
+          <h3 class="text-sm font-semibold text-slate-900">Timeline</h3>
+        </div>
+        <div id="timeline" class="divide-y divide-slate-100">
+          {% include "partidas/_timeline.html" %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Registrar gol (se partida em andamento) -->
+    {% if partida.status == "em_andamento" %}
+    <div class="mb-6 bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div class="px-4 py-3 border-b border-slate-100">
+        <h3 class="text-sm font-semibold text-slate-900">Registrar Gol</h3>
+      </div>
+      <div class="p-4">
+        <form
+          hx-post="/partidas/{{partida.id}}/gol"
+          hx-target="#placar"
+          hx-swap="outerHTML"
+          class="space-y-4"
+          id="golForm"
+        >
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">Time</label>
+            <select name="time_id" id="timeSelect" class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              {% if casa.id %}<option value="{{casa.id}}" data-time="casa">{{ casa.nome or "Casa" }}</option>{% endif %}
+              {% if fora.id %}<option value="{{fora.id}}" data-time="fora">{{ fora.nome or "Fora" }}</option>{% endif %}
+            </select>
+          </div>
+
+          {% set jogadores_casa = casa.jogadores or [] %}
+          {% set jogadores_fora = fora.jogadores or [] %}
+
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">Jogador que marcou</label>
+            <select name="jogador_id" id="jogadorSelect" class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              {% for j in jogadores_casa %}
+                <option value="{{ j.id }}" data-time="casa">{{ j.apelido or j.nome_completo }}</option>
+              {% endfor %}
+              {% for j in jogadores_fora %}
+                <option value="{{ j.id }}" data-time="fora">{{ j.apelido or j.nome_completo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">Assistência (opcional)</label>
+            <select name="assistencia_id" id="assistenciaSelect" class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              <option value="">Sem assistência</option>
+              {% for j in jogadores_casa %}
+                <option value="{{ j.id }}" data-time="casa">{{ j.apelido or j.nome_completo }}</option>
+              {% endfor %}
+              {% for j in jogadores_fora %}
+                <option value="{{ j.id }}" data-time="fora">{{ j.apelido or j.nome_completo }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">Minuto</label>
+              <input name="minuto" placeholder="Ex: 15" class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-700 mb-1.5">&nbsp;</label>
+              <label class="flex items-center gap-2 px-3 py-2.5 rounded-md border border-slate-300 bg-white cursor-pointer transition-all">
+                <input type="checkbox" name="gol_contra" class="rounded border-slate-300 text-blue-600 focus:ring-blue-500/20">
+                <span class="text-xs font-medium text-slate-700">Gol contra</span>
+              </label>
+            </div>
+          </div>
+
+          <button class="w-full h-10 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
+            {{ soccer_ball_icon("w-4 h-4", "white", "") }}
+            Adicionar gol
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Sub-tab Content: Statistics -->
+  <div id="sub-content-statistics" class="sub-tab-content hidden">
+    <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div class="px-4 py-3 border-b border-slate-100">
+        <h3 class="text-sm font-semibold text-slate-900">TEAM STATS</h3>
+      </div>
+      <div class="p-4 space-y-4">
+        <!-- Ball Possession -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-700">{{ casa.nome or "Casa" }}</span>
+            <span class="text-xs font-medium text-slate-700">Ball Possession</span>
+            <span class="text-xs font-medium text-slate-700">{{ fora.nome or "Fora" }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-blue-500" style="width: 50%"></div>
+            </div>
+            <span class="text-xs font-semibold text-slate-900 w-12 text-center">50%</span>
+            <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-red-500 ml-auto" style="width: 50%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shots -->
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-medium text-slate-700">{{ casa.nome or "Casa" }}</span>
+            <span class="text-xs font-medium text-slate-700">Shots</span>
+            <span class="text-xs font-medium text-slate-700">{{ fora.nome or "Fora" }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-blue-500" style="width: 68%"></div>
+            </div>
+            <span class="text-xs font-semibold text-slate-900 w-12 text-center">15</span>
+            <div class="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
+              <div class="h-full bg-red-500 ml-auto" style="width: 32%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Placeholder para outras estatísticas -->
+        <div class="text-center py-8 text-xs text-slate-500">
+          Mais estatísticas em breve
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sub-tab Content: Lineup -->
+  <div id="sub-content-lineup" class="sub-tab-content hidden">
+    <div class="space-y-6">
+      <!-- Time Casa -->
+      <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100">
+          <h3 class="text-sm font-semibold text-slate-900">{{ casa.nome or "Casa" }}</h3>
+        </div>
+        <div class="p-4">
+          {% if casa.jogadores and casa.jogadores|length %}
+            <div class="space-y-2">
+              {% for j in casa.jogadores %}
+                <div class="flex items-center gap-3 py-2">
+                  {% if j.foto_url %}
+                    <img src="http://192.168.18.38:5001{{ j.foto_url }}" alt="{{ j.apelido or j.nome_completo }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200" />
+                  {% else %}
+                    <div class="w-8 h-8 rounded-full bg-slate-100 grid place-items-center text-xs font-semibold text-slate-600 flex-shrink-0">
+                      {{ loop.index }}
+                    </div>
+                  {% endif %}
+                  <div class="flex-1">
+                    <div class="text-sm font-medium text-slate-900">{{ j.apelido or j.nome_completo }}</div>
+                    {% if j.posicao %}
+                      <div class="text-xs text-slate-500">{{ j.posicao }}</div>
+                    {% endif %}
+                  </div>
                 </div>
-              {% endif %}
-              <div class="flex-1">
-                <div class="text-sm font-medium text-slate-900">{{ j.apelido or j.nome_completo }}</div>
-                {% if j.posicao %}
-                  <div class="text-xs text-slate-500">{{ j.posicao }}</div>
-                {% endif %}
-              </div>
+              {% endfor %}
             </div>
-          {% endfor %}
+          {% else %}
+            <div class="text-center py-8 text-xs text-slate-500">Nenhum jogador cadastrado</div>
+          {% endif %}
         </div>
-      {% else %}
-        <div class="text-center py-8 text-sm text-slate-500">Nenhum jogador cadastrado</div>
-      {% endif %}
-    {% endcall %}
+      </div>
 
-    {% call card("Escalação - " ~ (fora.nome or "Fora"), "Jogadores do time visitante", "users", "green") %}
-      {% if fora.jogadores and fora.jogadores|length %}
-        <div class="space-y-2">
-          {% for j in fora.jogadores %}
-            <div class="rounded-md bg-white/60 backdrop-blur-xl p-3 flex items-center gap-3">
-              <div class="w-8 h-8 rounded-md bg-emerald-50/80 text-emerald-600 grid place-items-center text-xs font-semibold">
-                {{ loop.index }}
-              </div>
-              <div class="flex-1">
-                <div class="text-sm font-medium text-slate-900">{{ j.apelido or j.nome_completo }}</div>
-                {% if j.posicao %}
-                  <div class="text-xs text-slate-500">{{ j.posicao }}</div>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
+      <!-- Time Fora -->
+      <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-100">
+          <h3 class="text-sm font-semibold text-slate-900">{{ fora.nome or "Fora" }}</h3>
         </div>
-      {% else %}
-        <div class="text-center py-8 text-sm text-slate-500">Nenhum jogador cadastrado</div>
-      {% endif %}
-    {% endcall %}
+        <div class="p-4">
+          {% if fora.jogadores and fora.jogadores|length %}
+            <div class="space-y-2">
+              {% for j in fora.jogadores %}
+                <div class="flex items-center gap-3 py-2">
+                  {% if j.foto_url %}
+                    <img src="http://192.168.18.38:5001{{ j.foto_url }}" alt="{{ j.apelido or j.nome_completo }}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 border border-slate-200" />
+                  {% else %}
+                    <div class="w-8 h-8 rounded-full bg-slate-100 grid place-items-center text-xs font-semibold text-slate-600 flex-shrink-0">
+                      {{ loop.index }}
+                    </div>
+                  {% endif %}
+                  <div class="flex-1">
+                    <div class="text-sm font-medium text-slate-900">{{ j.apelido or j.nome_completo }}</div>
+                    {% if j.posicao %}
+                      <div class="text-xs text-slate-500">{{ j.posicao }}</div>
+                    {% endif %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-8 text-xs text-slate-500">Nenhum jogador cadastrado</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Tab Content: H2H -->
-<div id="content-h2h" class="tab-partida-content hidden">
-  {% call card("Histórico de Confrontos", "Partidas anteriores entre os times", "git-compare", "orange") %}
-    <div class="text-center py-12">
-      <div class="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-md bg-orange-50/80 text-orange-400">
-        <i data-lucide="git-compare" class="w-6 h-6"></i>
-      </div>
-      <div class="text-sm text-slate-800 font-semibold">Histórico em breve</div>
-      <div class="text-xs text-slate-500 mt-1.5">O histórico de confrontos estará disponível em breve.</div>
+<!-- Conteúdo: H2H Tab -->
+<div id="main-content-h2h" class="main-tab-content hidden">
+  <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100">
+      <h3 class="text-sm font-semibold text-slate-900">Head to Head</h3>
     </div>
-  {% endcall %}
+    <div class="p-4">
+      <div class="text-center py-12">
+        <div class="text-sm text-slate-800 font-medium">Histórico em breve</div>
+        <div class="text-xs text-slate-500 mt-1.5">O histórico de confrontos estará disponível em breve.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Conteúdo: Standings Tab -->
+<div id="main-content-standings" class="main-tab-content hidden">
+  <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100">
+      <h3 class="text-sm font-semibold text-slate-900">Standings</h3>
+    </div>
+    <div class="p-4">
+      <div class="text-center py-12">
+        <div class="text-sm text-slate-800 font-medium">Tabela em breve</div>
+        <div class="text-xs text-slate-500 mt-1.5">A tabela de classificação estará disponível em breve.</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-function showPartidaTab(tabName) {
-  // Esconde todos os conteúdos
-  document.querySelectorAll('.tab-partida-content').forEach(content => {
+function showMainTab(tabName) {
+  // Esconde todos os conteúdos principais
+  document.querySelectorAll('.main-tab-content').forEach(content => {
     content.classList.add('hidden');
   });
   
-  // Remove active de todas as tabs
-  document.querySelectorAll('.tab-partida-btn').forEach(btn => {
-    btn.classList.remove('active', 'bg-emerald-500', 'text-white');
-    btn.classList.add('bg-white/60', 'text-slate-600');
+  // Remove active de todas as tabs principais
+  document.querySelectorAll('.main-tab-btn').forEach(btn => {
+    btn.classList.remove('active', 'text-slate-900', 'border-blue-500');
+    btn.classList.add('text-slate-500', 'border-transparent');
   });
   
   // Mostra o conteúdo selecionado
-  const content = document.getElementById('content-' + tabName);
+  const content = document.getElementById('main-content-' + tabName);
   if (content) {
     content.classList.remove('hidden');
   }
   
   // Ativa a tab selecionada
-  const tab = document.getElementById('tab-' + tabName);
+  const tab = document.getElementById('main-tab-' + tabName);
   if (tab) {
-    tab.classList.add('active', 'bg-emerald-500', 'text-white');
-    tab.classList.remove('bg-white/60', 'text-slate-600');
+    tab.classList.add('active', 'text-slate-900', 'border-blue-500');
+    tab.classList.remove('text-slate-500', 'border-transparent');
+  }
+  
+  // Reinicializa ícones Lucide
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
+function showSubTab(tabName) {
+  // Esconde todos os conteúdos de sub-tabs
+  document.querySelectorAll('.sub-tab-content').forEach(content => {
+    content.classList.add('hidden');
+  });
+  
+  // Remove active de todas as sub-tabs
+  document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+    btn.classList.remove('active', 'text-slate-900', 'border-blue-500');
+    btn.classList.add('text-slate-500', 'border-transparent');
+  });
+  
+  // Mostra o conteúdo selecionado
+  const content = document.getElementById('sub-content-' + tabName);
+  if (content) {
+    content.classList.remove('hidden');
+  }
+  
+  // Ativa a sub-tab selecionada
+  const tab = document.getElementById('sub-tab-' + tabName);
+  if (tab) {
+    tab.classList.add('active', 'text-slate-900', 'border-blue-500');
+    tab.classList.remove('text-slate-500', 'border-transparent');
   }
   
   // Reinicializa ícones Lucide

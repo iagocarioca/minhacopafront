@@ -3,9 +3,10 @@
 {% block breadcrumb %}Time{% endblock %}
 {% block page_title %}Time{% endblock %}
 {% block content %}
-<div class="mb-6">
+{% if temporada_id %}<div data-temporada-id="{{ temporada_id }}" class="hidden"></div>{% endif %}
+<div class="mb-4">
   <div class="flex items-center justify-between gap-3">
-    <div>
+    <div class="flex-1">
       <h2 class="text-lg font-semibold text-slate-900">{{ time.nome }}</h2>
       <div class="mt-1 text-sm text-slate-600 flex items-center gap-2 flex-wrap">
         <span class="inline-flex items-center gap-2 text-[11px] px-2 py-0.5 rounded-full bg-white/60 border border-slate-300/60 text-slate-700">
@@ -20,57 +21,44 @@
         {% endif %}
       </div>
     </div>
-    {% if time.escudo_url %}
-      <img src="http://127.0.0.1:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-11 h-11 rounded-lg object-cover border border-slate-300/60" />
-    {% else %}
-      <div class="w-11 h-11 rounded-lg bg-yellow-50/70 border border-yellow-300/60 grid place-items-center text-yellow-600">
-        <i data-lucide="shirt" class="w-5 h-5"></i>
-      </div>
-    {% endif %}
+    <div class="flex items-center gap-2">
+      {% if time.escudo_url %}
+        <img src="http://192.168.18.38:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-11 h-11 rounded-lg object-cover border border-slate-300/60" />
+      {% else %}
+        <div class="w-11 h-11 rounded-lg bg-yellow-50/70 border border-yellow-300/60 grid place-items-center text-yellow-600">
+          <i data-lucide="shirt" class="w-5 h-5"></i>
+        </div>
+      {% endif %}
+      <button onclick="openEditModal()" class="w-10 h-10 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 grid place-items-center text-slate-700 transition-all">
+        <i data-lucide="settings" class="w-4 h-4"></i>
+      </button>
+    </div>
   </div>
 </div>
 
-<div class="grid lg:grid-cols-2 gap-4">
-  {% call card("Escalação do Time", (time.jogadores or [])|length ~ " jogadores", "users", "blue") %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[600px] overflow-y-auto pr-2" id="jogadores-list">
-      {% include "times/_jogadores_list.html" %}
-    </div>
-  {% endcall %}
+<!-- Botão para expandir formulário de adicionar jogador -->
+{% if jogadores_disponiveis %}
+<div class="mb-4">
+  <button id="btnAdicionarJogador" onclick="toggleAddJogadorForm()" class="w-full h-11 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
+    <i data-lucide="plus" class="w-4 h-4"></i>
+    Adicionar Jogador
+  </button>
 
-  {% call card("Editar Time", "Configurações do time", "settings", "purple") %}
-    <form method="post" enctype="multipart/form-data" class="space-y-3">
-      <input type="hidden" name="action" value="update_escudo">
-      <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Escudo do Time</label>
-        {% if time.escudo_url %}
-          <div class="mb-2">
-            <img src="http://127.0.0.1:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-20 h-20 rounded-md object-cover border border-slate-300/60" />
-          </div>
-        {% endif %}
-        <input type="file" name="escudo" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl text-slate-900 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
-      </div>
-      <button type="submit" class="w-full h-11 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2">
-        <i data-lucide="upload" class="w-4 h-4"></i>
-        Atualizar Escudo
-      </button>
-    </form>
-  {% endcall %}
-
-  {% call card("Adicionar Jogador", "Selecione um jogador disponível", "user-plus", "green") %}
-    {% if jogadores_disponiveis %}
+  <!-- Formulário (inicialmente oculto) -->
+  <div id="formAdicionarJogador" class="hidden mt-3 p-4 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60">
     <form method="post" 
           hx-post="{{ url_for('times.detalhe', time_id=time.id) }}"
           hx-target="#jogadores-list"
           hx-swap="innerHTML"
-          hx-on--after-swap="updateJogadoresCount()"
+          hx-on--after-swap="updateJogadoresCount(); toggleAddJogadorForm();"
           hx-on::after-request="if(event.detail.successful) { this.reset(); }"
           class="space-y-3">
       <input type="hidden" name="action" value="add">
 
       <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Selecione o jogador</label>
-        <select name="jogador_id" required class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
-          <option value="">-- Escolha um jogador --</option>
+        <label class="block text-xs font-medium text-slate-700 mb-1.5">Jogador</label>
+        <select name="jogador_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
+          <option value="">Escolha um jogador</option>
           {% for j in jogadores_disponiveis %}
             <option value="{{j.id}}">{{ j.apelido or j.nome_completo }}{% if j.telefone %} ({{ j.telefone }}){% endif %}</option>
           {% endfor %}
@@ -78,33 +66,122 @@
       </div>
 
       <div>
-        <label class="block text-xs font-semibold text-slate-700 mb-1.5">Posição (opcional)</label>
-        <input name="posicao" placeholder="Ex: Atacante, Goleiro, Defesa..." class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40" />
+        <label class="block text-xs font-medium text-slate-700 mb-1.5">Posição (opcional)</label>
+        <input name="posicao" placeholder="Ex: Atacante, Goleiro, Defesa..." class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40" />
       </div>
 
-      <label class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border cursor-pointer transition-all">
+      <label class="flex items-center gap-3 px-3 py-2 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border cursor-pointer transition-all">
         <input type="checkbox" name="capitao" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500/20">
-        <span class="text-sm font-semibold text-slate-900">Definir como capitão</span>
+        <span class="text-sm font-medium text-slate-900">Definir como capitão</span>
       </label>
 
-      <button class="w-full h-11 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2">
-        <i data-lucide="plus" class="w-4 h-4"></i>
-        Adicionar ao time
-      </button>
-    </form>
-    {% else %}
-      <div class="text-center py-8">
-        <div class="mb-3 inline-flex items-center justify-center w-11 h-11 rounded-lg bg-orange-50/70 border border-orange-300/60 text-orange-600">
-          <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-        </div>
-        <div class="text-sm text-slate-800 font-semibold">Nenhum jogador disponível</div>
-        <div class="text-xs text-slate-600 mt-1">A API não retornou a pelada_id ou não há jogadores cadastrados.</div>
+      <div class="flex gap-2">
+        <button type="submit" class="flex-1 h-10 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          Adicionar
+        </button>
+        <button type="button" onclick="toggleAddJogadorForm()" class="h-10 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
+          Cancelar
+        </button>
       </div>
-    {% endif %}
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% call card("Escalação do Time", (time.jogadores or [])|length ~ " jogadores", "users", "blue") %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[600px] overflow-y-auto pr-2" id="jogadores-list">
+      {% include "times/_jogadores_list.html" %}
+    </div>
   {% endcall %}
 </div>
 
+<!-- Modal de Editar Time -->
+<div id="editModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+  <div class="bg-white/95 backdrop-blur-xl rounded-md border border-slate-300/60 w-full max-w-md shadow-xl">
+    <div class="flex items-center justify-between p-4 border-b border-slate-300/60">
+      <h3 class="text-base font-medium text-slate-900">Editar Time</h3>
+      <button onclick="closeEditModal()" class="w-8 h-8 rounded-md bg-white/60 hover:bg-white/80 grid place-items-center text-slate-600 transition-all">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+    <div class="p-4">
+      <form method="post" enctype="multipart/form-data" class="space-y-4">
+        <input type="hidden" name="action" value="update_escudo">
+        <div>
+          <label class="block text-xs font-medium text-slate-700 mb-2">Escudo do Time</label>
+          {% if time.escudo_url %}
+            <div class="mb-3 flex justify-center">
+              <img src="http://192.168.18.38:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-24 h-24 rounded-md object-cover border border-slate-300/60" />
+            </div>
+          {% endif %}
+          <input type="file" name="escudo" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="submit" class="flex-1 h-10 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
+            <i data-lucide="upload" class="w-4 h-4"></i>
+            Atualizar
+          </button>
+          <button type="button" onclick="closeEditModal()" class="h-10 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <script>
+function openEditModal() {
+  const modal = document.getElementById('editModal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  }
+}
+
+function closeEditModal() {
+  const modal = document.getElementById('editModal');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('editModal')?.addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeEditModal();
+  }
+});
+
+// Fechar modal com ESC
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeEditModal();
+  }
+});
+
+function toggleAddJogadorForm() {
+  const form = document.getElementById('formAdicionarJogador');
+  const btn = document.getElementById('btnAdicionarJogador');
+  
+  if (form.classList.contains('hidden')) {
+    form.classList.remove('hidden');
+    btn.classList.add('hidden');
+    // Inicializar ícones do Lucide após mostrar o formulário
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  } else {
+    form.classList.add('hidden');
+    btn.classList.remove('hidden');
+  }
+}
+
 function updateJogadoresCount() {
   const list = document.getElementById('jogadores-list');
   if (!list) return;

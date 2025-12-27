@@ -1,1 +1,136 @@
-{% extends "layout/base.html" %} {% from "layout/card.html" import card %} {% block breadcrumb %}Rodada • Partidas{% endblock %} {% block page_title %}Partidas{% endblock %} {% block content %} <div class="mb-6"> <a href="/rodadas/{{rodada_id}}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors"> <i data-lucide="arrow-left" class="w-4 h-4"></i> Voltar para rodada </a> </div> <div class="grid lg:grid-cols-2 gap-6"> {% call card("Criar Partida", "Nova partida da rodada", "plus", "blue") %} {% if times_disponiveis and times_disponiveis|length >= 2 %} <form method="post" class="space-y-4"> <div class="grid grid-cols-2 gap-4"> <div> <label class="block text-xs font-semibold text-slate-700 mb-2 inline-flex items-center gap-2"> <i data-lucide="home" class="w-3.5 h-3.5"></i> Time da casa </label> <select name="time_casa_id" required class="w-full text-sm px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 "> <option value="">-- Selecione --</option> {% for t in times_disponiveis %} <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option> {% endfor %} </select> </div> <div> <label class="block text-xs font-semibold text-slate-700 mb-2 inline-flex items-center gap-2"> <i data-lucide="plane" class="w-3.5 h-3.5"></i> Time visitante </label> <select name="time_fora_id" required class="w-full text-sm px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 "> <option value="">-- Selecione --</option> {% for t in times_disponiveis %} <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option> {% endfor %} </select> </div> </div> <button class="w-full h-12 rounded-md bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2 "> <i data-lucide="plus" class="w-4 h-4"></i> Criar partida </button> </form> {% else %} <div class="text-center py-10"> <div class="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-md bg-slate-50/80 text-slate-400"> <i data-lucide="shirt" class="w-6 h-6"></i> </div> <div class="text-sm text-slate-800 font-semibold">Você precisa criar times primeiro.</div> <div class="text-xs text-slate-500 mt-1.5 mb-5">Crie pelo menos 2 times para criar uma partida.</div> <a href="{% if temporada_id %}/temporadas/{{temporada_id}}/times{% else %}/rodadas/{{rodada_id}}{% endif %}" class="inline-flex items-center justify-center gap-2 h-12 px-5 rounded-md bg-white/60 backdrop-blur-xl text-sm font-medium text-slate-700 transition-all hover:"> <i data-lucide="plus" class="w-4 h-4"></i> Criar times </a> </div> {% endif %} {% endcall %} {% call card("Partidas", partidas|length ~ " partidas cadastradas", "swords", "purple") %} <div class="space-y-3"> {% for p in partidas %} <a href="/partidas/{{p.id}}" class="block transition-all group"> <div class="rounded-md bg-white/60 backdrop-blur-xl hover: overflow-hidden transition-all"> <div class="px-5 py-4"> <div class="flex items-center justify-between gap-4"> <div class="min-w-0 flex-1"> <div class="text-sm font-medium text-slate-900 truncate"> {% if p.time_casa %}{{ p.time_casa.nome }}{% else %}Time Casa{% endif %} <span class="text-slate-300 mx-2">×</span> {% if p.time_fora %}{{ p.time_fora.nome }}{% else %}Time Fora{% endif %} </div> <div class="mt-2 flex items-center gap-2"> <span class="inline-flex items-center gap-2 px-3 py-1 rounded-md text-[11px] font-medium {% if p.status == 'em_andamento' %}bg-emerald-50/80 text-emerald-700{% elif p.status == 'finalizada' %}bg-slate-100/80 text-slate-700{% else %}bg-blue-50/80 text-blue-700{% endif %}"> <span class="w-1.5 h-1.5 rounded-full {% if p.status == 'em_andamento' %}bg-emerald-500{% elif p.status == 'finalizada' %}bg-slate-400{% else %}bg-blue-500{% endif %}"></span> {{ p.status }} </span> </div> </div> <div class="flex items-center gap-3"> <div class="px-4 py-2 rounded-md bg-white/80 text-lg font-medium text-slate-900 "> {{ p.gols_casa }} : {{ p.gols_fora }} </div> <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 group-hover:text-slate-600 transition-colors"></i> </div> </div> </div> </div> </a> {% else %} <div class="text-center py-10"> <div class="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-md bg-purple-50/80 text-purple-400"> <i data-lucide="swords" class="w-6 h-6"></i> </div> <div class="text-sm text-slate-800 font-semibold">Nenhuma partida cadastrada</div> <div class="text-xs text-slate-500 mt-1.5">Crie sua primeira partida.</div> </div> {% endfor %} </div> {% endcall %} </div> {% endblock %} 
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+{% block breadcrumb %}Rodada • Partidas{% endblock %}
+{% block page_title %}Partidas{% endblock %}
+{% block content %}
+<div class="mb-6">
+  <a href="/rodadas/{{rodada_id}}" class="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900 transition-colors">
+    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+    Voltar para rodada
+  </a>
+</div>
+
+<!-- Lista de Partidas -->
+{% call card("Partidas", partidas|length ~ " partidas cadastradas", "swords", "purple") %}
+<div class="space-y-3">
+  {% for p in partidas %}
+  <a href="/partidas/{{p.id}}" class="block transition-all group">
+    <div class="rounded-md bg-white/60 backdrop-blur-xl hover: overflow-hidden transition-all">
+      <div class="px-5 py-4">
+        <div class="flex items-center justify-between gap-4">
+          <div class="min-w-0 flex-1">
+            <div class="text-sm font-medium text-slate-900 truncate">
+              {% if p.time_casa %}{{ p.time_casa.nome }}{% else %}Time Casa{% endif %}
+              <span class="text-slate-300 mx-2">×</span>
+              {% if p.time_fora %}{{ p.time_fora.nome }}{% else %}Time Fora{% endif %}
+            </div>
+            <div class="mt-2 flex items-center gap-2">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-md text-[11px] font-medium {% if p.status == 'em_andamento' %}bg-emerald-50/80 text-emerald-700{% elif p.status == 'finalizada' %}bg-slate-100/80 text-slate-700{% else %}bg-blue-50/80 text-blue-700{% endif %}">
+                <span class="w-1.5 h-1.5 rounded-full {% if p.status == 'em_andamento' %}bg-emerald-500{% elif p.status == 'finalizada' %}bg-slate-400{% else %}bg-blue-500{% endif %}"></span>
+                {{ p.status }}
+              </span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="px-4 py-2 rounded-md bg-white/80 text-lg font-medium text-slate-900">
+              {{ p.gols_casa }} : {{ p.gols_fora }}
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 group-hover:text-slate-600 transition-colors"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </a>
+  {% else %}
+  <div class="text-center py-10">
+    <div class="mb-4 inline-flex items-center justify-center w-14 h-14 rounded-md bg-purple-50/80 text-purple-400">
+      <i data-lucide="swords" class="w-6 h-6"></i>
+    </div>
+    <div class="text-sm text-slate-800 font-semibold">Nenhuma partida cadastrada</div>
+    <div class="text-xs text-slate-500 mt-1.5">Crie sua primeira partida.</div>
+  </div>
+  {% endfor %}
+</div>
+{% endcall %}
+
+<!-- Botão para criar partida (minimalista, sem ícone) -->
+<div class="mt-6">
+  <button id="btnCriarPartida" onclick="toggleFormPartida()" class="w-full h-11 rounded-md bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-sm transition-all">
+    Criar Partida
+  </button>
+</div>
+
+<!-- Formulário (inicialmente oculto) -->
+<div id="formCriarPartida" class="hidden mt-4">
+  <div class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+    <div class="px-4 py-3 border-b border-slate-100">
+      <h3 class="text-sm font-semibold text-slate-900">Nova Partida</h3>
+    </div>
+    <div class="p-4">
+      {% if times_disponiveis and times_disponiveis|length >= 2 %}
+      <form method="post" class="space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">Time da casa</label>
+            <select name="time_casa_id" required class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              <option value="">-- Selecione --</option>
+              {% for t in times_disponiveis %}
+              <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">Time visitante</label>
+            <select name="time_fora_id" required class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500">
+              <option value="">-- Selecione --</option>
+              {% for t in times_disponiveis %}
+              <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 h-10 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-all">
+            Criar partida
+          </button>
+          <button type="button" onclick="toggleFormPartida()" class="px-4 h-10 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm transition-all">
+            Cancelar
+          </button>
+        </div>
+      </form>
+      {% else %}
+      <div class="text-center py-8">
+        <div class="mb-3 inline-flex items-center justify-center w-11 h-11 rounded-md bg-slate-50/80 text-slate-400">
+          <i data-lucide="shirt" class="w-5 h-5"></i>
+        </div>
+        <div class="text-sm text-slate-800 font-semibold">Você precisa criar times primeiro.</div>
+        <div class="text-xs text-slate-600 mt-1 mb-4">Crie pelo menos 2 times para criar uma partida.</div>
+        <a href="{% if temporada_id %}/temporadas/{{temporada_id}}/times{% else %}/rodadas/{{rodada_id}}{% endif %}" class="inline-flex items-center justify-center gap-2 h-10 px-4 rounded-md bg-white border border-slate-300 hover:bg-slate-50 text-sm font-medium text-slate-700 transition-all">
+          Criar times
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleFormPartida() {
+  const form = document.getElementById('formCriarPartida');
+  const btn = document.getElementById('btnCriarPartida');
+  
+  if (form.classList.contains('hidden')) {
+    form.classList.remove('hidden');
+    btn.classList.add('hidden');
+    // Inicializar ícones do Lucide após mostrar o formulário
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  } else {
+    form.classList.add('hidden');
+    btn.classList.remove('hidden');
+  }
+}
+</script>
+
+{% endblock %}

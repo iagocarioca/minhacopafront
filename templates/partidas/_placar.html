@@ -2,7 +2,7 @@
 {% set fora = partida.time_fora_full or partida.time_fora or {} %}
 
 <!-- Card verde grande estilo imagem -->
-<div class="rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 overflow-hidden shadow-lg">
+<div class="rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 overflow-hidden">
   <!-- Header do card -->
   <div class="px-5 pt-5 pb-3">
     <div class="text-xs font-medium text-emerald-50/90 uppercase tracking-wider mb-2">
@@ -21,7 +21,7 @@
         <!-- Logo do time (escudo ou placeholder circular) -->
         <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 rounded-full bg-white/20 backdrop-blur-sm grid place-items-center border-2 border-white/30 overflow-hidden">
           {% if casa.escudo_url %}
-            <img src="http://127.0.0.1:5001{{ casa.escudo_url }}" alt="{{ casa.nome }}" class="w-full h-full object-cover" />
+            <img src="http://192.168.18.38:5001{{ casa.escudo_url }}" alt="{{ casa.nome }}" class="w-full h-full object-cover" />
           {% elif casa.nome %}
             <span class="text-white font-medium text-lg sm:text-xl">{{ (casa.nome[0:2] if casa.nome|length > 2 else casa.nome[0]) | upper }}</span>
           {% else %}
@@ -59,7 +59,7 @@
         <!-- Logo do time (escudo ou placeholder circular) -->
         <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3 rounded-full bg-white/20 backdrop-blur-sm grid place-items-center border-2 border-white/30 overflow-hidden">
           {% if fora.escudo_url %}
-            <img src="http://127.0.0.1:5001{{ fora.escudo_url }}" alt="{{ fora.nome }}" class="w-full h-full object-cover" />
+            <img src="http://192.168.18.38:5001{{ fora.escudo_url }}" alt="{{ fora.nome }}" class="w-full h-full object-cover" />
           {% elif fora.nome %}
             <span class="text-white font-medium text-lg sm:text-xl">{{ (fora.nome[0:2] if fora.nome|length > 2 else fora.nome[0]) | upper }}</span>
           {% else %}

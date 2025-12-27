@@ -7,7 +7,7 @@
 <!-- Capa de perfil -->
 {% if pelada.perfil_url %}
   <div class="mb-6 -mx-6 sm:-mx-8 lg:-mx-12">
-    <img src="http://127.0.0.1:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
+    <img src="http://192.168.18.38:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
   </div>
 {% endif %}
 
@@ -16,7 +16,7 @@
   <div class="rounded-md bg-white/60 backdrop-blur-xl p-5">
     <div class="flex items-center gap-4">
       {% if pelada.logo_url %}
-        <img src="http://127.0.0.1:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+        <img src="http://192.168.18.38:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
       {% else %}
         <div class="w-16 h-16 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 grid place-items-center flex-shrink-0">
           <i data-lucide="soccer-ball" class="w-8 h-8 text-white"></i>
@@ -39,12 +39,20 @@
 
 <!-- Temporada Ativa -->
 {% if temporada_ativa %}
-  {% call card("Temporada Atual", (temporada_ativa.inicio_mes | data_br if temporada_ativa.inicio_mes else "—") ~ " → " ~ (temporada_ativa.fim_mes | data_br if temporada_ativa.fim_mes else "—"), "calendar", "green") %}
-    <div class="flex items-center gap-3">
-      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50/80 text-emerald-700 text-xs font-medium">
-        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-        Temporada Ativa
-      </span>
+  {% call card("Temporada Atual", "Temporada Ativa", "calendar", "green") %}
+    <div class="space-y-3">
+      <div class="text-xs text-slate-600">
+        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100/80 border border-slate-300/60 text-slate-600">
+          <i data-lucide="calendar" class="w-3 h-3"></i>
+          {{ temporada_ativa.inicio_mes | data_br if temporada_ativa.inicio_mes else "—" }} → {{ temporada_ativa.fim_mes | data_br if temporada_ativa.fim_mes else "—" }}
+        </span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-emerald-50/80 text-emerald-700 text-xs font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          Temporada Ativa
+        </span>
+      </div>
     </div>
   {% endcall %}
 {% else %}
@@ -98,7 +106,7 @@
                 <!-- Escudo do Time -->
                 <div class="flex-shrink-0">
                   {% if time.escudo_url %}
-                    <img src="http://127.0.0.1:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                    <img src="http://192.168.18.38:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
                   {% else %}
                     <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
                       <i data-lucide="shirt" class="w-5 h-5 text-white"></i>
@@ -152,7 +160,7 @@
                 <!-- Foto do Jogador -->
                 <div class="flex-shrink-0">
                   {% if jogador.foto_url %}
-                    <img src="http://127.0.0.1:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                    <img src="http://192.168.18.38:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
                   {% else %}
                     <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
                       <i data-lucide="user" class="w-5 h-5 text-white"></i>
@@ -204,7 +212,7 @@
                 <!-- Foto do Jogador -->
                 <div class="flex-shrink-0">
                   {% if jogador.foto_url %}
-                    <img src="http://127.0.0.1:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                    <img src="http://192.168.18.38:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
                   {% else %}
                     <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
                       <i data-lucide="user" class="w-5 h-5 text-white"></i>

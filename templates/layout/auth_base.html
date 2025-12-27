@@ -1,9 +1,20 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#10B981" />
   <title>{% block title %}EFootBool{% endblock %}</title>
+
+  <!-- Google Fonts - Poppins -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -27,13 +38,122 @@
   <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    /* UX minimalista refinado (Apple-like) */
     body {
+      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       font-feature-settings: "ss01" 1;
       letter-spacing: -0.011em;
       background: #F5F5F7;
+      /* Previne zoom no iOS quando input é focado */
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
     }
+
     .transition-all {
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Previne zoom automático no iOS quando input é focado */
+    /* Todos os inputs devem ter font-size >= 16px */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="tel"],
+    input[type="url"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    input[type="datetime-local"],
+    textarea,
+    select {
+      font-size: 16px !important;
+      /* Remove zoom no iOS Safari */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      /* Melhora legibilidade no mobile */
+      line-height: 1.5;
+    }
+
+    /* Ajusta tamanho do placeholder para manter proporção */
+    input[type="text"]::placeholder,
+    input[type="email"]::placeholder,
+    input[type="password"]::placeholder,
+    input[type="number"]::placeholder,
+    input[type="tel"]::placeholder,
+    input[type="url"]::placeholder,
+    input[type="search"]::placeholder,
+    input[type="date"]::placeholder,
+    input[type="time"]::placeholder,
+    textarea::placeholder {
+      font-size: 16px;
+      opacity: 0.6;
+    }
+
+    /* Ajusta select para parecer mais nativo no mobile */
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px;
+      padding-right: 36px;
+    }
+
+    /* Remove highlight azul no iOS */
+    input,
+    textarea,
+    select {
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    /* Melhora experiência de toque */
+    button,
+    a,
+    input,
+    select,
+    textarea {
+      touch-action: manipulation;
+    }
+
+    /* Melhorias para experiência mobile/app-like */
+    @media (max-width: 768px) {
+
+      /* Previne seleção de texto acidental no mobile */
+      * {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      input,
+      textarea,
+      [contenteditable] {
+        -webkit-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+      }
+
+      /* Previne pull-to-refresh no iOS */
+      body {
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Melhora scroll suave */
+      * {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Ajusta safe area para iPhone X e superiores */
+      body {
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+      }
     }
   </style>
 </head>
@@ -52,20 +172,20 @@
       </div>
 
       {% with msgs = get_flashed_messages(with_categories=true) %}
-        {% if msgs %}
-          <div class="space-y-2 mb-5">
-            {% for cat, msg in msgs %}
-              <div class="rounded-lg px-4 py-3 text-xs border backdrop-blur-xl
+      {% if msgs %}
+      <div class="space-y-2 mb-5">
+        {% for cat, msg in msgs %}
+        <div class="rounded-lg px-4 py-3 text-xs border backdrop-blur-xl
                 {% if cat == 'ok' %}
                   bg-emerald-50/60 border-emerald-300/60 text-emerald-800
                 {% else %}
                   bg-rose-50/60 border-rose-300/60 text-rose-800
                 {% endif %}">
-                {{ msg }}
-              </div>
-            {% endfor %}
-          </div>
-        {% endif %}
+          {{ msg }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
       {% endwith %}
 
       <main>
@@ -75,13 +195,14 @@
   </div>
 
   <script>
-    try { window.lucide && window.lucide.createIcons(); } catch(e) {}
+    try { window.lucide && window.lucide.createIcons(); } catch (e) { }
     document.body.addEventListener('htmx:load', () => {
-      try { window.lucide && window.lucide.createIcons(); } catch(e) {}
+      try { window.lucide && window.lucide.createIcons(); } catch (e) { }
     });
     document.body.addEventListener('htmx:afterSwap', () => {
-      try { window.lucide && window.lucide.createIcons(); } catch(e) {}
+      try { window.lucide && window.lucide.createIcons(); } catch (e) { }
     });
   </script>
 </body>
+
 </html>

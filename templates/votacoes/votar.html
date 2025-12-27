@@ -6,81 +6,51 @@
 
 {% block content %}
 {% if votacao_info %}
-{% call card("⏰ Período de Votação", votacao_info.tipo or "Votação", "clock", "blue") %}
-<div class="space-y-2.5 text-sm">
-  <div class="flex items-center justify-between">
-    <span class="text-slate-600">Tipo:</span>
-    <span class="font-semibold text-slate-900">{{ votacao_info.tipo or "—" }}</span>
-  </div>
-  <div class="flex items-center justify-between">
-    <span class="text-slate-600">Abre em:</span>
-    <span class="font-mono text-emerald-700 text-xs">{{ votacao_info.abre_em | data_br(True) if votacao_info.abre_em else "—" }}</span>
-  </div>
-  <div class="flex items-center justify-between">
-    <span class="text-slate-600">Fecha em:</span>
-    <span class="font-mono text-rose-700 text-xs">{{ votacao_info.fecha_em | data_br(True) if votacao_info.fecha_em else "—" }}</span>
-  </div>
-  <div class="mt-4 pt-4 border-t border-slate-200/50">
-    <div class="flex items-center justify-between">
-      <span class="text-slate-600">Hora do servidor:</span>
-      <span class="font-mono text-emerald-700 text-xs" id="server-time">Carregando...</span>
-    </div>
+<div class="mb-4 p-3 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60">
+  <div class="text-xs text-slate-600 mb-1.5">{{ votacao_info.tipo or "Votação" }}</div>
+  <div class="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap">
+    <span>{{ votacao_info.abre_em | data_br(True) if votacao_info.abre_em else "—" }}</span>
+    <span>→</span>
+    <span>{{ votacao_info.fecha_em | data_br(True) if votacao_info.fecha_em else "—" }}</span>
   </div>
 </div>
-{% endcall %}
 {% endif %}
 
-{% call card("Votar", "Selecione seus jogadores favoritos", "vote", "green") %}
-<form method="post" class="space-y-4" id="voteForm">
+{% call card("Votar", "Selecione até 3 jogadores", "vote", "green") %}
+<form method="post" class="space-y-3" id="voteForm">
   <div>
-    <label class="block text-xs font-semibold text-slate-700 mb-2">Seu jogador (votante) <span class="text-rose-600">*</span></label>
-    <input name="jogador_votante_id" type="number" min="1" placeholder="Digite seu número de jogador" required class="w-full text-sm px-4 py-3 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
-    <p class="text-[11px] text-slate-500 mt-2">💡 Você pode encontrar seu número na lista de jogadores abaixo</p>
+    <label class="block text-xs font-medium text-slate-700 mb-1.5">Seu número <span class="text-rose-600">*</span></label>
+    <input name="jogador_votante_id" type="number" min="1" placeholder="Número do jogador" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
   </div>
 
-  <div class="rounded-md bg-blue-50/60 backdrop-blur-xl p-4 text-xs text-slate-700 flex items-start gap-3">
-    <i data-lucide="info" class="w-4 h-4 mt-0.5 text-blue-600"></i>
-    <div>
-      Selecione até <span class="font-semibold text-slate-900">3</span> jogadores. Cada seleção registra <span class="font-semibold text-slate-900">1 ponto</span>.
-      <div class="mt-2 text-slate-600 font-medium">Selecionados: <span id="selCount" class="text-emerald-600">0</span>/3</div>
-    </div>
+  <div class="flex items-center justify-between text-xs px-3 py-2 rounded-md bg-slate-50/60">
+    <span class="text-slate-600">Selecionados</span>
+    <span class="font-medium text-slate-900"><span id="selCount" class="text-emerald-600">0</span>/3</span>
   </div>
 
   {% if posicoes and posicoes|length %}
-  <div class="space-y-4">
+  <div class="space-y-3">
     {% for pos, jogadores in posicoes %}
-    <div class="rounded-md bg-white/60 backdrop-blur-xl overflow-hidden">
-      <div class="px-5 py-4 flex items-center justify-between bg-gradient-to-r from-slate-50/50 to-transparent">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-md bg-emerald-50/80 flex items-center justify-center ">
-            <i data-lucide="users" class="w-4 h-4 text-emerald-600"></i>
-          </div>
-          <div>
-            <div class="text-sm font-medium text-slate-900">{{ pos }}</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">{{ jogadores|length }} jogador(es)</div>
-          </div>
-        </div>
+    <div class="rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 overflow-hidden">
+      <div class="px-3 py-2 bg-slate-50/60">
+        <div class="text-xs font-medium text-slate-900">{{ pos }}</div>
       </div>
-      <div class="p-4 grid sm:grid-cols-2 gap-3">
+      <div class="p-2 space-y-1.5">
         {% for j in jogadores %}
-        <label class="flex items-center gap-3 px-4 py-3 rounded-md bg-white/80 backdrop-blur-xl transition-all cursor-pointer group hover:bg-white/90">
+        <label class="flex items-center gap-2.5 px-3 py-2 rounded-md bg-white/60 backdrop-blur-xl transition-all cursor-pointer hover:bg-white/80">
           <input type="checkbox" class="voteCheck rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/30" name="jogador_votado_ids" value="{{ j.id }}">
-          <div class="flex items-center gap-2.5 flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-1 min-w-0">
             {% if j.foto_url %}
-              <img src="http://127.0.0.1:5001{{ j.foto_url }}" alt="{{ j.nome }}" class="w-8 h-8 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
+              <img src="http://192.168.18.38:5001{{ j.foto_url }}" alt="{{ j.nome }}" class="w-7 h-7 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
             {% else %}
-              <div class="w-8 h-8 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center flex-shrink-0">
-                <i data-lucide="user" class="w-4 h-4 text-white"></i>
+              <div class="w-7 h-7 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center flex-shrink-0">
+                <i data-lucide="user" class="w-3.5 h-3.5 text-white"></i>
               </div>
             {% endif %}
             <div class="min-w-0 flex-1">
-              <div class="text-sm font-semibold text-slate-900 truncate">{{ j.nome }}</div>
-              <div class="text-[11px] text-slate-500 truncate flex items-center gap-1.5 mt-0.5">
-                <span>{{ j.time_nome }}</span>
-                {% if j.posicao_nome and j.posicao_nome != "Sem posição" %}
-                <span class="text-slate-400">•</span>
-                <span class="font-medium text-emerald-600">{{ j.posicao_nome }}</span>
-                {% endif %}
+              <div class="text-sm font-medium text-slate-900 truncate">{{ j.nome }}</div>
+              <div class="text-[11px] text-slate-500 truncate">
+                {{ j.time_nome }}{% if j.posicao_nome and j.posicao_nome != "Sem posição" %} • {{ j.posicao_nome }}{% endif %}
               </div>
             </div>
           </div>
@@ -97,14 +67,13 @@
   </div>
   {% endif %}
 
-  <div class="grid grid-cols-2 gap-3">
-    <button type="submit" class="h-12 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2">
+  <div class="flex gap-2 pt-2">
+    <button type="submit" class="flex-1 h-11 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
       <i data-lucide="check" class="w-4 h-4"></i>
-      Registrar voto
+      Votar
     </button>
-    <a href="{{ url_for('votacoes.resultado', votacao_id=votacao_id, rodada_id=rodada_id) }}" class="h-12 rounded-md bg-emerald-50/70 hover:bg-emerald-50 text-sm font-semibold text-emerald-700 transition-all inline-flex items-center justify-center gap-2">
+    <a href="{{ url_for('votacoes.resultado', votacao_id=votacao_id, rodada_id=rodada_id) }}" class="h-11 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
       <i data-lucide="trophy" class="w-4 h-4"></i>
-      Ver Resultado
     </a>
   </div>
 </form>
@@ -146,16 +115,6 @@
   });
 
   refreshCount();
-
-  function updateServerTime() {
-    const now = new Date();
-    const formatted = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0') + ' ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0') + ':' + String(now.getSeconds()).padStart(2, '0');
-    const el = document.getElementById('server-time');
-    if (el) el.textContent = formatted;
-  }
-
-  updateServerTime();
-  setInterval(updateServerTime, 1000);
 })();
 </script>
 {% endcall %}

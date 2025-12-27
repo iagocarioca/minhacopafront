@@ -37,4 +37,6 @@ def detalhe(temporada_id: int):
             return redirect(url_for("temporadas.detalhe", temporada_id=temporada_id))
 
     data = svc.obter_temporada(temporada_id)
-    return render_template("temporadas/detalhe.html", temporada=data.get("temporada"))
+    temporada = data.get("temporada", {})
+    pelada_id = temporada.get("pelada_id")
+    return render_template("temporadas/detalhe.html", temporada=temporada, pelada_id=pelada_id)
