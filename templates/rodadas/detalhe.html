@@ -60,23 +60,101 @@
 </div>
 
 <!-- Ações rápidas -->
-<div class="grid md:grid-cols-2 gap-4 mb-6">
-  <a href="/rodadas/{{rodada.id}}/partidas" class="group p-5 rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border transition-all">
-    <div class="w-11 h-11 rounded-lg bg-primary-50/70 border border-primary-300/60 grid place-items-center text-primary-700 mb-3">
-      <i data-lucide="swords" class="w-5 h-5"></i>
-    </div>
-    <div class="text-sm font-semibold text-slate-900">Partidas</div>
-    <div class="text-xs text-slate-500 mt-1">Ver e criar partidas</div>
-  </a>
-
-  <a href="/rodadas/{{rodada.id}}/votacoes" class="group p-5 rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border transition-all">
-    <div class="w-11 h-11 rounded-lg bg-purple-50/70 border border-purple-300/60 grid place-items-center text-purple-700 mb-3">
+<div class="mb-6">
+  <a href="/rodadas/{{rodada.id}}/votacoes" class="group p-5 rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl hover-border transition-all inline-flex items-center gap-4">
+    <div class="w-11 h-11 rounded-lg bg-purple-50/70 border border-purple-300/60 grid place-items-center text-purple-700">
       <i data-lucide="vote" class="w-5 h-5"></i>
     </div>
-    <div class="text-sm font-semibold text-slate-900">Votações</div>
-    <div class="text-xs text-slate-500 mt-1">MVP e destaques</div>
+    <div>
+      <div class="text-sm font-semibold text-slate-900">Votações</div>
+      <div class="text-xs text-slate-500 mt-0.5">MVP e destaques</div>
+    </div>
   </a>
 </div>
+
+<!-- Partidas -->
+{% call card("Partidas", (partidas|length if partidas else 0) ~ " partidas", "swords", "purple") %}
+<div class="space-y-2 mb-4">
+  {% if partidas and partidas|length > 0 %}
+    {% for p in partidas %}
+    <a href="/partidas/{{p.id}}" class="block rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border p-3 transition-all group">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="text-sm font-medium text-slate-900 truncate">
+            {% if p.time_casa %}{{ p.time_casa.nome }}{% else %}Time Casa{% endif %}
+            <span class="text-slate-300 mx-2">×</span>
+            {% if p.time_fora %}{{ p.time_fora.nome }}{% else %}Time Fora{% endif %}
+          </div>
+          <div class="mt-1.5 flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium {% if p.status == 'em_andamento' %}bg-emerald-50/80 text-emerald-700{% elif p.status == 'finalizada' %}bg-slate-100/80 text-slate-700{% else %}bg-blue-50/80 text-blue-700{% endif %}">
+              <span class="w-1.5 h-1.5 rounded-full {% if p.status == 'em_andamento' %}bg-emerald-500{% elif p.status == 'finalizada' %}bg-slate-400{% else %}bg-blue-500{% endif %}"></span>
+              {{ p.status }}
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <div class="px-3 py-1.5 rounded-md bg-white/60 text-base font-medium text-slate-900">
+            {{ p.gols_casa or 0 }} : {{ p.gols_fora or 0 }}
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  {% else %}
+    <div class="text-center py-8">
+      <div class="mb-3 inline-flex items-center justify-center w-11 h-11 rounded-md bg-purple-50/80 text-purple-400">
+        <i data-lucide="swords" class="w-5 h-5"></i>
+      </div>
+      <div class="text-sm text-slate-800 font-medium">Nenhuma partida cadastrada</div>
+      <div class="text-xs text-slate-500 mt-1">Crie sua primeira partida.</div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Botão para criar partida -->
+{% if times_disponiveis and times_disponiveis|length >= 2 %}
+<button id="btnCriarPartida" onclick="toggleFormPartida()" class="w-full h-11 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
+  <i data-lucide="plus" class="w-4 h-4"></i>
+  Criar Partida
+</button>
+
+<!-- Formulário (inicialmente oculto) -->
+<div id="formCriarPartida" class="hidden mt-3 p-4 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60">
+  <form method="post" class="space-y-3">
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1.5">Time da casa</label>
+        <select name="time_casa_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
+          <option value="">Selecione</option>
+          {% for t in times_disponiveis %}
+          <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1.5">Time visitante</label>
+        <select name="time_fora_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
+          <option value="">Selecione</option>
+          {% for t in times_disponiveis %}
+          <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button type="submit" class="flex-1 h-10 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        Criar
+      </button>
+      <button type="button" onclick="toggleFormPartida()" class="h-10 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endcall %}
 
 <!-- Times da rodada (só mostra se houver times) -->
 {% if rodada.times and rodada.times|length > 0 %}
@@ -102,4 +180,22 @@
     </div>
   {% endcall %}
 {% endif %}
+
+<script>
+function toggleFormPartida() {
+  const form = document.getElementById('formCriarPartida');
+  const btn = document.getElementById('btnCriarPartida');
+  
+  if (form.classList.contains('hidden')) {
+    form.classList.remove('hidden');
+    btn.classList.add('hidden');
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  } else {
+    form.classList.add('hidden');
+    btn.classList.remove('hidden');
+  }
+}
+</script>
 {% endblock %}

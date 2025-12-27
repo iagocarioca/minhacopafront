@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from services import rodada_service as svc
 from services import time_service as time_svc
 from services import temporada_service as temp_svc
+from services import partida_service as partida_svc
 from services.api_client import ApiError
 
 rodadas_bp = Blueprint("rodadas", __name__)
@@ -41,8 +42,17 @@ def list_create(temporada_id: int):
 
     return render_template("rodadas/list.html", temporada_id=temporada_id, pelada_id=pelada_id, data=data, times_disponiveis=times_disponiveis)
 
-@rodadas_bp.route("/rodadas/<int:rodada_id>")
+@rodadas_bp.route("/rodadas/<int:rodada_id>", methods=["GET", "POST"])
 def detalhe(rodada_id: int):
+    # Se for POST, é para criar partida
+    if request.method == "POST":
+        try:
+            partida_svc.criar_partida(rodada_id, int(request.form.get("time_casa_id")), int(request.form.get("time_fora_id")))
+            flash("Partida criada!", "ok")
+        except ApiError as e:
+            flash(e.payload.get("erro","Erro ao criar partida"), "error")
+        return redirect(url_for("rodadas.detalhe", rodada_id=rodada_id))
+    
     data = svc.obter_rodada(rodada_id)
     rodada = data.get("rodada", {})
     
@@ -61,4 +71,14 @@ def detalhe(rodada_id: int):
     # Extrair temporada_id para navegação
     temporada_id = rodada.get("temporada_id")
     
-    return render_template("rodadas/detalhe.html", rodada=rodada, temporada_id=temporada_id)
+    # Buscar partidas da rodada
+    partidas_data = partida_svc.listar_partidas(rodada_id)
+    partidas = partidas_data.get("partidas", [])
+    
+    # Buscar times disponíveis para criar partida
+    times_disponiveis = []
+    if temporada_id:
+        times_data = time_svc.listar_times_pelada(temporada_id)
+        times_disponiveis = times_data.get("data", [])
+    
+    return render_template("rodadas/detalhe.html", rodada=rodada, temporada_id=temporada_id, partidas=partidas, times_disponiveis=times_disponiveis)
