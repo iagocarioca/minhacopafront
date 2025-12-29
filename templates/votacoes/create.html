@@ -52,10 +52,6 @@
       <div class="flex-1 space-y-1.5">
         <div class="text-[11px] text-slate-600">Será enviado: <span id="preview_abre" class="text-emerald-600 font-medium">—</span></div>
         <div class="text-[11px] text-slate-600">até: <span id="preview_fecha" class="text-rose-600 font-medium">—</span></div>
-        <label class="flex items-center gap-2 cursor-pointer pt-1.5">
-          <input type="checkbox" id="use_utc" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500/20" />
-          <span class="text-[11px] text-slate-600">Converter para UTC</span>
-        </label>
       </div>
     </div>
   </div>
@@ -80,6 +76,14 @@
       <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
       Resultado
     </a>
+  </div>
+  <div class="flex gap-2">
+    <form method="post" action="{{ url_for('votacoes.encerrar', votacao_id=created_id, rodada_id=rodada_id) }}" class="flex-1" onsubmit="return confirm('Tem certeza que deseja encerrar esta votação?');">
+      <button type="submit" class="w-full h-10 rounded-md bg-rose-50/80 hover:bg-rose-50 text-xs font-medium text-rose-700 inline-flex items-center justify-center gap-2 transition-all">
+        <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+        Encerrar Votação
+      </button>
+    </form>
   </div>
   <div class="flex gap-2">
     <input id="created_link" readonly value="{{ request.url_root.rstrip('/') ~ created_path }}" class="flex-1 text-xs px-3 py-2 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 font-mono" />
@@ -107,15 +111,62 @@
       <a href="{{ url_for('votacoes.resultado', votacao_id=v.id, rodada_id=v.rodada_id) }}" class="h-9 px-2.5 rounded-md bg-emerald-50/80 hover:bg-emerald-50 text-xs font-medium text-emerald-700 inline-flex items-center gap-1 transition-all" title="Resultado">
         <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
       </a>
-      <a href="{{ p }}" class="h-9 px-2.5 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-xs font-medium text-slate-700 inline-flex items-center gap-1 transition-all">
+      <a href="{{ p }}" class="h-9 px-2.5 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-xs font-medium text-slate-700 inline-flex items-center gap-1 transition-all" title="Votar">
         <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
       </a>
+      <form method="post" action="{{ url_for('votacoes.encerrar', votacao_id=v.id, rodada_id=v.rodada_id) }}" onsubmit="return confirm('Tem certeza que deseja encerrar esta votação?');" class="inline">
+        <button type="submit" class="h-9 px-2.5 rounded-md bg-rose-50/80 hover:bg-rose-50 text-xs font-medium text-rose-700 inline-flex items-center gap-1 transition-all" title="Encerrar Votação">
+          <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+        </button>
+      </form>
     </div>
   </div>
   {% endfor %}
 </div>
 {% endcall %}
 {% endif %}
+
+{% call card("Votações da rodada", "Criadas nesta rodada", "list", "blue") %}
+<div class="space-y-2">
+  {% if votacoes_api %}
+  {% for v in votacoes_api[:10] %}
+    {% set vid = (v.id if v.id is defined else v.get('id')) %}
+    {% set rid = (v.rodada_id if v.rodada_id is defined else v.get('rodada_id', rodada_id)) %}
+    {% set tipo = (v.tipo if v.tipo is defined else v.get('tipo')) %}
+    {% set abre = (v.abre_em if v.abre_em is defined else v.get('abre_em')) %}
+    {% set fecha = (v.fecha_em if v.fecha_em is defined else v.get('fecha_em')) %}
+    {% if vid %}
+    {% set p = "/votacoes/" ~ vid ~ "/votar?rodada_id=" ~ rid %}
+    <div class="rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 px-3 py-2.5 flex items-center justify-between gap-2">
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium text-slate-900">{{ tipo or "Votação" }}</div>
+        {% if abre and fecha %}
+        <div class="text-[11px] text-slate-500 mt-0.5">{{ abre | data_br(True) }} → {{ fecha | data_br(True) }}</div>
+        {% endif %}
+      </div>
+      <div class="flex gap-1.5">
+        <a href="{{ url_for('votacoes.resultado', votacao_id=vid, rodada_id=rid) }}" class="h-9 px-2.5 rounded-md bg-emerald-50/80 hover:bg-emerald-50 text-xs font-medium text-emerald-700 inline-flex items-center gap-1 transition-all" title="Resultado">
+          <i data-lucide="trophy" class="w-3.5 h-3.5"></i>
+        </a>
+        <a href="{{ p }}" class="h-9 px-2.5 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-xs font-medium text-slate-700 inline-flex items-center gap-1 transition-all" title="Votar">
+          <i data-lucide="check-square" class="w-3.5 h-3.5"></i>
+        </a>
+        <form method="post" action="{{ url_for('votacoes.encerrar', votacao_id=vid, rodada_id=rid) }}" onsubmit="return confirm('Tem certeza que deseja encerrar esta votação?');" class="inline">
+          <button type="submit" class="h-9 px-2.5 rounded-md bg-rose-50/80 hover:bg-rose-50 text-xs font-medium text-rose-700 inline-flex items-center gap-1 transition-all" title="Encerrar Votação">
+            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% else %}
+    <div class="text-sm text-slate-700 py-6 text-center">
+      Nenhuma votação criada para esta rodada ainda.
+    </div>
+  {% endif %}
+</div>
+{% endcall %}
 
 <script>
 function buildApiDatetime(d, t, convertToUTC = false) {
@@ -136,7 +187,7 @@ function updatePreview() {
   const abreTime = document.getElementById("abre_time")?.value;
   const fechaDate = document.getElementById("fecha_date")?.value;
   const fechaTime = document.getElementById("fecha_time")?.value;
-  const useUTC = document.getElementById("use_utc")?.checked || false;
+  const useUTC = false;
   if (!abreDate || !abreTime || !fechaDate || !fechaTime) {
     const pa = document.getElementById("preview_abre");
     const pf = document.getElementById("preview_fecha");
@@ -148,8 +199,8 @@ function updatePreview() {
   const fecha = buildApiDatetime(fechaDate, fechaTime, useUTC);
   const pa = document.getElementById("preview_abre");
   const pf = document.getElementById("preview_fecha");
-  if (pa) pa.textContent = abre + (useUTC ? ' (UTC)' : '');
-  if (pf) pf.textContent = fecha + (useUTC ? ' (UTC)' : '');
+  if (pa) pa.textContent = abre;
+  if (pf) pf.textContent = fecha;
 }
 
 function buildVotacaoIso() {
@@ -158,7 +209,7 @@ function buildVotacaoIso() {
   const abreTime = document.getElementById("abre_time")?.value;
   const fechaDate = document.getElementById("fecha_date")?.value;
   const fechaTime = document.getElementById("fecha_time")?.value;
-  const useUTC = document.getElementById("use_utc")?.checked || false;
+  const useUTC = false;
   if (!abreDate || !abreTime || !fechaDate || !fechaTime) {
     alert("Selecione data e horário de início e fim.");
     return false;
@@ -250,10 +301,6 @@ document.addEventListener("DOMContentLoaded", () => {
         el.addEventListener("input", updatePreview);
       }
     });
-    const utcCheckbox = document.getElementById("use_utc");
-    if (utcCheckbox) {
-      utcCheckbox.addEventListener("change", updatePreview);
-    }
     updatePreview();
   }, 100);
 });

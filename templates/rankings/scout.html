@@ -1,0 +1,128 @@
+{% extends "layout/base.html" %}
+{% from "layout/card.html" import card %}
+
+{% block breadcrumb %}Temporada • Scout{% endblock %}
+{% block page_title %}Scout da Temporada{% endblock %}
+
+{% block header_action %}
+<button type="button" data-share-hide="1" onclick="shareScreenshot('capture-scout', 'scout-temporada.png', 'Scout da Temporada')"
+  class="h-10 px-3 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-xs font-semibold text-slate-700 transition-all inline-flex items-center gap-2 border border-slate-300/60">
+  <i data-lucide="share-2" class="w-4 h-4"></i>
+  Compartilhar
+</button>
+{% endblock %}
+
+{% block content %}
+<div class="md:hidden mb-3">
+  <button type="button" data-share-hide="1" onclick="shareScreenshot('capture-scout', 'scout-temporada.png', 'Scout da Temporada')"
+    class="w-full h-11 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2 border border-slate-300/60">
+    <i data-lucide="share-2" class="w-4 h-4"></i>
+    Compartilhar
+  </button>
+</div>
+
+<div id="capture-scout" class="space-y-6">
+  {% call card("Scout da Temporada", temporada.inicio_mes ~ " - " ~ temporada.fim_mes if temporada.inicio_mes and temporada.fim_mes else "Estatísticas do ano", "bar-chart-3", "blue") %}
+  
+  <!-- Estatísticas Gerais -->
+  <div class="grid md:grid-cols-2 gap-4 mb-6">
+    <!-- Total de Gols -->
+    <div class="rounded-md bg-gradient-to-br from-emerald-50 to-emerald-100/60 border border-emerald-200/60 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Total de Gols</div>
+        {% from "layout/soccer_ball_icon.html" import soccer_ball_icon %}
+        <div class="text-emerald-600">
+          {{ soccer_ball_icon("w-6 h-6", "currentColor", "") }}
+        </div>
+      </div>
+      <div class="text-3xl font-bold text-emerald-900">{{ total_gols }}</div>
+      <div class="text-xs text-emerald-700 mt-1">Marcados na temporada</div>
+    </div>
+
+    <!-- Total de Assistências -->
+    <div class="rounded-md bg-gradient-to-br from-blue-50 to-blue-100/60 border border-blue-200/60 p-5">
+      <div class="flex items-center justify-between mb-3">
+        <div class="text-xs font-semibold text-blue-700 uppercase tracking-wide">Total de Assistências</div>
+        <i data-lucide="target" class="w-6 h-6 text-blue-600"></i>
+      </div>
+      <div class="text-3xl font-bold text-blue-900">{{ total_assistencias }}</div>
+      <div class="text-xs text-blue-700 mt-1">Distribuídas na temporada</div>
+    </div>
+  </div>
+
+  <!-- Time Campeão -->
+  {% if time_campeao %}
+  <div class="rounded-md bg-gradient-to-br from-yellow-50 to-yellow-100/60 border-2 border-yellow-300/60 p-6 mb-6">
+    <div class="flex items-center gap-3 mb-4">
+      <div class="w-12 h-12 rounded-lg bg-yellow-500 grid place-items-center">
+        <i data-lucide="trophy" class="w-7 h-7 text-white"></i>
+      </div>
+      <div>
+        <div class="text-xs font-semibold text-yellow-700 uppercase tracking-wide mb-1">Campeão da Temporada</div>
+        <div class="text-xl font-bold text-yellow-900">{{ time_campeao.nome or "Time Campeão" }}</div>
+      </div>
+    </div>
+    
+    {% if time_campeao.escudo_url %}
+    <div class="flex justify-center mb-4">
+      <img src="/media/{{ time_campeao.escudo_url[1:] if time_campeao.escudo_url.startswith('/') else time_campeao.escudo_url }}" 
+           alt="{{ time_campeao.nome }}" 
+           class="w-24 h-24 rounded-xl object-cover border-2 border-yellow-300/60 shadow-lg" />
+    </div>
+    {% endif %}
+
+    {% if time_campeao.pontos is defined %}
+    <div class="text-center">
+      <div class="text-sm text-yellow-700 font-medium mb-1">Pontos</div>
+      <div class="text-2xl font-bold text-yellow-900">{{ time_campeao.pontos }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Jogadores Campeões -->
+  {% if jogadores_campeoes and jogadores_campeoes|length > 0 %}
+  <div>
+    <div class="text-sm font-semibold text-slate-700 mb-3 inline-flex items-center gap-2">
+      <i data-lucide="users" class="w-4 h-4"></i>
+      Jogadores Campeões
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+      {% for jogador in jogadores_campeoes %}
+      <div class="rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 p-3 text-center">
+        {% if jogador.foto_url %}
+          <img src="/media/{{ jogador.foto_url[1:] if jogador.foto_url.startswith('/') else jogador.foto_url }}" 
+               alt="{{ jogador.apelido or jogador.nome_completo }}" 
+               class="w-12 h-12 rounded-lg object-cover border border-slate-300/60 mx-auto mb-2" />
+        {% else %}
+          <div class="w-12 h-12 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center mx-auto mb-2">
+            <i data-lucide="user" class="w-6 h-6 text-white"></i>
+          </div>
+        {% endif %}
+        <div class="text-xs font-medium text-slate-900 truncate">{{ jogador.apelido or jogador.nome_completo }}</div>
+        {% if jogador.posicao %}
+          <div class="text-[10px] text-slate-500 mt-0.5">{{ jogador.posicao }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <div class="text-center py-8 text-sm text-slate-500">
+    <i data-lucide="users" class="w-8 h-8 mx-auto mb-2 opacity-50"></i>
+    <div>Nenhum jogador encontrado no time campeão</div>
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="text-center py-12 text-slate-500">
+    <i data-lucide="trophy" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+    <div class="text-sm font-medium">Nenhum campeão definido ainda</div>
+    <div class="text-xs mt-1">A temporada ainda não foi finalizada</div>
+  </div>
+  {% endif %}
+
+  {% endcall %}
+</div>
+
+{% endblock %}
+
+

@@ -4,44 +4,59 @@
 {% block page_title %}Times{% endblock %}
 {% block content %}
 <div class="grid lg:grid-cols-2 gap-4">
-  {% call card("Criar Time", "Temporada #" ~ temporada_id, "shirt", "yellow") %}
-  <form method="post" enctype="multipart/form-data" class="space-y-3">
-    <div>
-      <label class="block text-xs font-semibold text-slate-700 mb-1.5 inline-flex items-center gap-2">
-        <i data-lucide="shirt" class="w-3.5 h-3.5"></i>
-        Nome do time
-      </label>
-      <input type="text" name="nome" placeholder="Ex: Time A, Azul, Vermelho..." required
-        class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40 transition-all" />
-    </div>
-    <div>
-      <label class="block text-xs font-semibold text-slate-700 mb-1.5 inline-flex items-center gap-2">
-        <i data-lucide="palette" class="w-3.5 h-3.5"></i>
-        Cor do time (opcional)
-      </label>
-      <input type="text" name="cor" placeholder="Ex: azul, vermelho, verde..."
-        class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 transition-all" />
-    </div>
-    <div>
-      <label class="block text-xs font-semibold text-slate-700 mb-1.5 inline-flex items-center gap-2">
-        <i data-lucide="image" class="w-3.5 h-3.5"></i>
-        Escudo (opcional)
-      </label>
-      <input type="file" name="escudo" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
-        class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl text-slate-900 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
-    </div>
-    <div
-      class="text-xs text-slate-600 bg-yellow-50/60 border border-yellow-300/60 rounded-lg p-3 flex items-start gap-2">
-      <i data-lucide="info" class="w-4 h-4 mt-0.5"></i>
-      <span>Os times ficam fixos durante toda a temporada.</span>
-    </div>
-    <button
-      class="w-full h-11 rounded-lg bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2">
+  <div>
+    <!-- Botão minimalista para abrir o form -->
+    <button id="btnCriarTime" onclick="toggleFormTime()" class="w-full h-11 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
       <i data-lucide="plus" class="w-4 h-4"></i>
       Criar time
     </button>
-  </form>
-  {% endcall %}
+
+    <!-- Formulário (inicialmente oculto) -->
+    <div id="formCriarTime" class="hidden mt-3">
+      {% call card("Criar Time", "Temporada #" ~ temporada_id, "shirt", "yellow") %}
+      <form method="post" enctype="multipart/form-data" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5 inline-flex items-center gap-2">
+            <i data-lucide="shirt" class="w-3.5 h-3.5"></i>
+            Nome do time
+          </label>
+          <input type="text" name="nome" placeholder="Ex: Time A, Azul, Vermelho..." required
+            class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40 transition-all" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5 inline-flex items-center gap-2">
+            <i data-lucide="palette" class="w-3.5 h-3.5"></i>
+            Cor do time (opcional)
+          </label>
+          <input type="text" name="cor" placeholder="Ex: azul, vermelho, verde..."
+            class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/40 transition-all" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5 inline-flex items-center gap-2">
+            <i data-lucide="image" class="w-3.5 h-3.5"></i>
+            Escudo (opcional)
+          </label>
+          <input type="file" name="escudo" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+            class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/40 backdrop-blur-xl text-slate-900 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
+        </div>
+        <div class="text-xs text-slate-600 bg-yellow-50/60 border border-yellow-300/60 rounded-lg p-3 flex items-start gap-2">
+          <i data-lucide="info" class="w-4 h-4 mt-0.5"></i>
+          <span>Os times ficam fixos durante toda a temporada.</span>
+        </div>
+
+        <div class="flex gap-2">
+          <button type="submit" class="flex-1 h-10 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
+            <i data-lucide="check" class="w-4 h-4"></i>
+            Criar
+          </button>
+          <button type="button" onclick="toggleFormTime()" class="h-10 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
+            Cancelar
+          </button>
+        </div>
+      </form>
+      {% endcall %}
+    </div>
+  </div>
 
   {% call card("Times", times|length ~ " times cadastrados", "shirt", "yellow") %}
   <div class="space-y-2">
@@ -52,7 +67,7 @@
         <div class="flex-1">
           <div class="flex items-center gap-3 mb-2">
             {% if t.escudo_url %}
-            <img src="http://192.168.18.38:5001{{ t.escudo_url }}" alt="{{ t.nome }}"
+            <img src="http://192.168.18.162:5001{{ t.escudo_url }}" alt="{{ t.nome }}"
               class="w-9 h-9 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
             {% else %}
             <div
@@ -91,4 +106,23 @@
   </div>
   {% endcall %}
 </div>
+
+<script>
+function toggleFormTime() {
+  const form = document.getElementById('formCriarTime');
+  const btn = document.getElementById('btnCriarTime');
+  if (!form || !btn) return;
+
+  if (form.classList.contains('hidden')) {
+    form.classList.remove('hidden');
+    btn.classList.add('hidden');
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  } else {
+    form.classList.add('hidden');
+    btn.classList.remove('hidden');
+  }
+}
+</script>
 {% endblock %}

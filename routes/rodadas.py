@@ -80,5 +80,51 @@ def detalhe(rodada_id: int):
     if temporada_id:
         times_data = time_svc.listar_times_pelada(temporada_id)
         times_disponiveis = times_data.get("data", [])
+
+    # Enriquecer partidas com nome/escudo dos times (para evitar "Time 1/Time 2" no template)
+    try:
+        times_map = {}
+        for t in (times_disponiveis or []):
+            if isinstance(t, dict) and t.get("id") is not None:
+                times_map[int(t["id"])] = t
+
+        enriched = []
+        for p in (partidas or []):
+            if not isinstance(p, dict):
+                enriched.append(p)
+                continue
+
+            # tenta extrair ids em diferentes formatos
+            casa_id = p.get("time_casa_id")
+            fora_id = p.get("time_fora_id")
+            if casa_id is None and isinstance(p.get("time_casa"), dict):
+                casa_id = p["time_casa"].get("id")
+            if fora_id is None and isinstance(p.get("time_fora"), dict):
+                fora_id = p["time_fora"].get("id")
+
+            try:
+                if casa_id is not None:
+                    casa_id = int(casa_id)
+                if fora_id is not None:
+                    fora_id = int(fora_id)
+            except Exception:
+                pass
+
+            # anexa fulls (sem sobrescrever se já vier completo)
+            if not isinstance(p.get("time_casa_full"), dict) and casa_id in times_map:
+                p["time_casa_full"] = times_map[casa_id]
+            if not isinstance(p.get("time_fora_full"), dict) and fora_id in times_map:
+                p["time_fora_full"] = times_map[fora_id]
+
+            # compat: se o template esperar p.time_casa/p.time_fora como dict
+            if not isinstance(p.get("time_casa"), dict) and casa_id in times_map:
+                p["time_casa"] = times_map[casa_id]
+            if not isinstance(p.get("time_fora"), dict) and fora_id in times_map:
+                p["time_fora"] = times_map[fora_id]
+
+            enriched.append(p)
+        partidas = enriched
+    except Exception:
+        pass
     
     return render_template("rodadas/detalhe.html", rodada=rodada, temporada_id=temporada_id, partidas=partidas, times_disponiveis=times_disponiveis)

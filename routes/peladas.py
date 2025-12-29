@@ -81,6 +81,189 @@ def perfil(pelada_id: int):
         print(f"[DEBUG] Pelada {pelada_id} - dados completos: {pelada}")
     return render_template("peladas/perfil.html", **data)
 
+@peladas_bp.route("/peladas/<int:pelada_id>/scout-anual")
+def scout_anual(pelada_id: int):
+    """Scout anual consolidado de todas as temporadas da pelada"""
+    from services import temporada_service as temp_svc, ranking_service as rank_svc, time_service as time_svc
+    from services.api_client import ApiError
+    
+    try:
+        # Busca dados da pelada
+        pelada_data = svc.perfil_pelada(pelada_id)
+        pelada = pelada_data.get("pelada", {})
+        
+        # Busca todas as temporadas (com paginação)
+        todas_temporadas = []
+        page = 1
+        while True:
+            try:
+                data = temp_svc.listar_temporadas(pelada_id, page=page, per_page=100)
+                temporadas = data.get("data", [])
+                todas_temporadas.extend(temporadas)
+                
+                meta = data.get("meta", {})
+                if page >= meta.get("total_pages", 1):
+                    break
+                page += 1
+            except Exception as e:
+                print(f"[WARN] Erro ao buscar temporadas (página {page}): {e}")
+                break
+        
+        # Agrega dados de todas as temporadas
+        ranking_gols_consolidado = {}  # {jogador_id: {"jogador": {...}, "total_gols": X}}
+        ranking_assistencias_consolidado = {}  # {jogador_id: {"jogador": {...}, "total_assistencias": X}}
+        titulos_jogadores = {}  # {jogador_id: quantidade_titulos}
+        
+        for temporada in todas_temporadas:
+            temporada_id = temporada.get("id")
+            if not temporada_id:
+                continue
+            
+            try:
+                # Ranking de artilheiros
+                artilheiros_data = rank_svc.ranking_artilheiros(temporada_id, limit=1000)
+                if isinstance(artilheiros_data, list):
+                    ranking_artilheiros = artilheiros_data
+                elif isinstance(artilheiros_data, dict):
+                    ranking_artilheiros = artilheiros_data.get("ranking", [])
+                else:
+                    ranking_artilheiros = []
+                
+                for item in ranking_artilheiros:
+                    jogador = item.get("jogador", {}) if isinstance(item, dict) else {}
+                    jogador_id = jogador.get("id") if isinstance(jogador, dict) else None
+                    if not jogador_id:
+                        continue
+                    
+                    gols = (jogador.get("total_gols") if isinstance(jogador, dict) else None) or item.get("gols") or item.get("total_gols") or 0
+                    gols = int(gols) if gols else 0
+                    
+                    if jogador_id not in ranking_gols_consolidado:
+                        ranking_gols_consolidado[jogador_id] = {
+                            "jogador": jogador,
+                            "total_gols": 0
+                        }
+                    ranking_gols_consolidado[jogador_id]["total_gols"] += gols
+                
+                # Ranking de assistências
+                assistencias_data = rank_svc.ranking_assistencias(temporada_id, limit=1000)
+                if isinstance(assistencias_data, list):
+                    ranking_assistencias = assistencias_data
+                elif isinstance(assistencias_data, dict):
+                    ranking_assistencias = assistencias_data.get("ranking", [])
+                else:
+                    ranking_assistencias = []
+                
+                for item in ranking_assistencias:
+                    jogador = item.get("jogador", {}) if isinstance(item, dict) else {}
+                    jogador_id = jogador.get("id") if isinstance(jogador, dict) else None
+                    if not jogador_id:
+                        continue
+                    
+                    assistencias = (jogador.get("total_assistencias") if isinstance(jogador, dict) else None) or item.get("assistencias") or item.get("total_assistencias") or 0
+                    assistencias = int(assistencias) if assistencias else 0
+                    
+                    if jogador_id not in ranking_assistencias_consolidado:
+                        ranking_assistencias_consolidado[jogador_id] = {
+                            "jogador": jogador,
+                            "total_assistencias": 0
+                        }
+                    ranking_assistencias_consolidado[jogador_id]["total_assistencias"] += assistencias
+                
+                # Time campeão (primeiro lugar)
+                times_data = rank_svc.ranking_times(temporada_id)
+                if isinstance(times_data, list):
+                    ranking_times = times_data
+                elif isinstance(times_data, dict):
+                    ranking_times = times_data.get("ranking", [])
+                else:
+                    ranking_times = []
+                
+                if ranking_times and len(ranking_times) > 0:
+                    primeiro_lugar = ranking_times[0]
+                    time_campeao = primeiro_lugar.get("time", {}) if isinstance(primeiro_lugar, dict) else primeiro_lugar
+                    
+                    if time_campeao and time_campeao.get("id"):
+                        try:
+                            time_data = time_svc.obter_time(time_campeao["id"])
+                            if isinstance(time_data, dict):
+                                time_full = time_data.get("time", time_data)
+                                jogadores_time = time_full.get("jogadores", []) if isinstance(time_full, dict) else []
+                                
+                                for jogador in jogadores_time:
+                                    jogador_id = jogador.get("id")
+                                    if jogador_id:
+                                        titulos_jogadores[jogador_id] = titulos_jogadores.get(jogador_id, 0) + 1
+                        except Exception as e:
+                            print(f"[WARN] Erro ao buscar jogadores do time campeão (temp {temporada_id}): {e}")
+            
+            except Exception as e:
+                print(f"[WARN] Erro ao processar temporada {temporada_id}: {e}")
+                continue
+        
+        # Ordena rankings
+        ranking_gols_final = sorted(
+            ranking_gols_consolidado.values(),
+            key=lambda x: x["total_gols"],
+            reverse=True
+        )
+        
+        ranking_assistencias_final = sorted(
+            ranking_assistencias_consolidado.values(),
+            key=lambda x: x["total_assistencias"],
+            reverse=True
+        )
+        
+        # Ranking de títulos (jogadores com mais títulos) - agrupado por quantidade
+        ranking_titulos_por_qtd = {}  # {qtd_titulos: [lista de jogadores]}
+        for jogador_id, qtd_titulos in titulos_jogadores.items():
+            # Busca dados do jogador (pega de qualquer ranking)
+            jogador_data = None
+            if jogador_id in ranking_gols_consolidado:
+                jogador_data = ranking_gols_consolidado[jogador_id]["jogador"]
+            elif jogador_id in ranking_assistencias_consolidado:
+                jogador_data = ranking_assistencias_consolidado[jogador_id]["jogador"]
+            
+            if jogador_data:
+                if qtd_titulos not in ranking_titulos_por_qtd:
+                    ranking_titulos_por_qtd[qtd_titulos] = []
+                ranking_titulos_por_qtd[qtd_titulos].append({
+                    "jogador": jogador_data,
+                    "total_titulos": qtd_titulos
+                })
+        
+        # Ordena por quantidade de títulos (decrescente) e converte para lista de grupos
+        ranking_titulos = []
+        for qtd in sorted(ranking_titulos_por_qtd.keys(), reverse=True):
+            ranking_titulos.append({
+                "total_titulos": qtd,
+                "jogadores": ranking_titulos_por_qtd[qtd]
+            })
+        
+        return render_template(
+            "peladas/scout_anual.html",
+            pelada_id=pelada_id,
+            pelada=pelada,
+            ranking_gols=ranking_gols_final,
+            ranking_assistencias=ranking_assistencias_final,
+            ranking_titulos=ranking_titulos,
+            total_temporadas=len(todas_temporadas)
+        )
+    
+    except Exception as e:
+        print(f"[ERROR] Scout anual: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
+        return render_template(
+            "peladas/scout_anual.html",
+            pelada_id=pelada_id,
+            pelada={},
+            ranking_gols=[],
+            ranking_assistencias=[],
+            ranking_titulos=[],
+            total_temporadas=0
+        )
+
 @peladas_bp.route("/peladas/<int:pelada_id>/publico")
 def perfil_publico(pelada_id: int):
     """Perfil público da pelada - sem autenticação necessária (rota legada com ID)"""

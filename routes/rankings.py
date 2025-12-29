@@ -87,3 +87,101 @@ def assistencias(temporada_id: int):
         import traceback
         traceback.print_exc()
         return render_template("rankings/assistencias.html", temporada_id=temporada_id, ranking=[], limit=limit)
+
+@rankings_bp.route("/temporadas/<int:temporada_id>/scout")
+def scout(temporada_id: int):
+    """Exibe o scout anual da temporada com estatísticas e campeões"""
+    from services import temporada_service as temp_svc
+    from services import time_service as time_svc
+    
+    try:
+        # Busca informações da temporada
+        temporada_data = temp_svc.obter_temporada(temporada_id)
+        temporada = temporada_data.get("temporada", {}) if isinstance(temporada_data, dict) else {}
+        
+        # Busca ranking de times para encontrar o campeão
+        ranking_times_data = svc.ranking_times(temporada_id)
+        if isinstance(ranking_times_data, list):
+            ranking_times = ranking_times_data
+        elif isinstance(ranking_times_data, dict):
+            ranking_times = ranking_times_data.get("ranking", [])
+        else:
+            ranking_times = []
+        
+        time_campeao = None
+        jogadores_campeoes = []
+        if ranking_times and len(ranking_times) > 0:
+            primeiro_lugar = ranking_times[0]
+            time_campeao = primeiro_lugar.get("time", {}) if isinstance(primeiro_lugar, dict) else primeiro_lugar
+            
+            # Busca jogadores do time campeão
+            if time_campeao and time_campeao.get("id"):
+                try:
+                    time_data = time_svc.obter_time(time_campeao["id"])
+                    if isinstance(time_data, dict):
+                        time_full = time_data.get("time", time_data)
+                        jogadores_campeoes = time_full.get("jogadores", []) if isinstance(time_full, dict) else []
+                except Exception as e:
+                    print(f"[WARN] Erro ao buscar jogadores do time campeão: {e}")
+                    jogadores_campeoes = []
+        
+        # Busca ranking de artilheiros para calcular total de gols
+        artilheiros_data = svc.ranking_artilheiros(temporada_id, limit=1000)  # Limite alto para pegar todos
+        if isinstance(artilheiros_data, list):
+            ranking_artilheiros = artilheiros_data
+        elif isinstance(artilheiros_data, dict):
+            ranking_artilheiros = artilheiros_data.get("ranking", [])
+        else:
+            ranking_artilheiros = []
+        
+        total_gols = 0
+        for item in ranking_artilheiros:
+            if isinstance(item, dict):
+                # Tenta diferentes campos possíveis (mesma lógica do template)
+                jogador = item.get("jogador", {})
+                gols = (jogador.get("total_gols") if isinstance(jogador, dict) else None) or item.get("gols") or item.get("total_gols") or 0
+                total_gols += int(gols) if gols else 0
+            elif isinstance(item, (int, float)):
+                total_gols += int(item)
+        
+        # Busca ranking de assistências para calcular total
+        assistencias_data = svc.ranking_assistencias(temporada_id, limit=1000)  # Limite alto para pegar todos
+        if isinstance(assistencias_data, list):
+            ranking_assistencias = assistencias_data
+        elif isinstance(assistencias_data, dict):
+            ranking_assistencias = assistencias_data.get("ranking", [])
+        else:
+            ranking_assistencias = []
+        
+        total_assistencias = 0
+        for item in ranking_assistencias:
+            if isinstance(item, dict):
+                # Tenta diferentes campos possíveis (mesma lógica do template)
+                jogador = item.get("jogador", {})
+                assistencias = (jogador.get("total_assistencias") if isinstance(jogador, dict) else None) or item.get("assistencias") or item.get("total_assistencias") or 0
+                total_assistencias += int(assistencias) if assistencias else 0
+            elif isinstance(item, (int, float)):
+                total_assistencias += int(item)
+        
+        return render_template(
+            "rankings/scout.html",
+            temporada_id=temporada_id,
+            temporada=temporada,
+            time_campeao=time_campeao,
+            jogadores_campeoes=jogadores_campeoes,
+            total_gols=total_gols,
+            total_assistencias=total_assistencias
+        )
+    except Exception as e:
+        print(f"[ERROR] Scout: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
+        return render_template(
+            "rankings/scout.html",
+            temporada_id=temporada_id,
+            temporada={},
+            time_campeao=None,
+            jogadores_campeoes=[],
+            total_gols=0,
+            total_assistencias=0
+        )

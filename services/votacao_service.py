@@ -7,6 +7,13 @@ def criar_votacao(rodada_id: int, abre_em: str, fecha_em: str, tipo: str):
         "tipo": tipo
     })
 
+def listar_votacoes_rodada(rodada_id: int):
+    """Lista votações criadas para uma rodada (se a API implementar GET na mesma rota do POST)."""
+    try:
+        return api("GET", f"/api/peladas/rodadas/{rodada_id}/votacoes")
+    except Exception:
+        return None
+
 def obter_votacao(votacao_id: int):
     """Busca detalhes de uma votação (se a API implementar GET)"""
     try:
@@ -29,3 +36,7 @@ def votar(votacao_id: int, jogador_votante_id: int, jogador_votado_id: int, pont
         "jogador_votado_id": jogador_votado_id,
         "pontos": pontos
     })
+
+def encerrar_votacao(votacao_id: int):
+    """Encerra uma votação manualmente"""
+    return api("POST", f"/api/peladas/votacoes/{votacao_id}/encerrar")

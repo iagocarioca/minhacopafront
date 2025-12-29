@@ -43,6 +43,7 @@
 
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
   <style>
     /* UX minimalista refinado (Apple-like) */
@@ -236,6 +237,19 @@
       background: rgba(16, 185, 129, 0.5);
     }
 
+    /* Remove degradê no topo de elementos com scroll - aplicado globalmente */
+    * {
+      -webkit-mask-image: none !important;
+      mask-image: none !important;
+    }
+    
+    /* Exceção para elementos que precisam de mask (se houver algum) */
+    img,
+    svg {
+      -webkit-mask-image: initial;
+      mask-image: initial;
+    }
+
     /* Previne zoom automático no iOS quando input é focado */
     /* Todos os inputs devem ter font-size >= 16px */
     input[type="text"],
@@ -355,7 +369,7 @@ defined else None) %}
   <div class="min-h-screen lg:grid lg:grid-cols-12">
     <!-- Sidebar -->
     <aside id="sidebar" class="fixed lg:static z-50 lg:z-auto inset-y-0 left-0 w-[270px] lg:w-auto
-         bg-white/30 backdrop-blur-3xl
+         bg-white/30
          -translate-x-full lg:translate-x-0 transition-transform duration-200 ease-out
          lg:col-span-3 xl:col-span-2" style="will-change: transform;">
       <div class="h-full flex flex-col">
@@ -363,7 +377,7 @@ defined else None) %}
         <div class="px-4 py-5">
           <a href="/peladas" class="flex items-center justify-center group">
             <img src="{{ url_for('static', filename='imgs/logo.png') }}" alt="Logo"
-              class="w-64 h-64 object-contain flex-shrink-0 max-w-full" />
+              class="w-24 h-24 object-contain flex-shrink-0 max-w-full" />
           </a>
         </div>
 
@@ -485,7 +499,7 @@ defined else None) %}
     <!-- Main -->
     <div class="lg:col-span-9 xl:col-span-10">
       <!-- Header (minimalista: sem bordas) -->
-      <header class="lg:sticky lg:top-0 z-30 bg-white/30 backdrop-blur-3xl">
+      <header class="z-30 bg-white/30 backdrop-blur-3xl">
         <div class="px-4 py-3 relative">
           <!-- Voltar (mobile clean) -->
           <button id="btnBack" onclick="smartBack()"
@@ -493,15 +507,17 @@ defined else None) %}
             <i data-lucide="arrow-left" class="w-6 h-6 text-slate-700"></i>
           </button>
 
-          <!-- Breadcrumb (desktop) -->
-          <div class="hidden lg:block text-xs text-slate-500 absolute left-4 top-1/2 -translate-y-1/2">
-            {% block breadcrumb %}Painel{% endblock %}
-          </div>
-
-          <!-- Título centralizado em relação à tela (mobile) / à esquerda (desktop) -->
-          <div class="flex items-center justify-center lg:justify-start lg:ml-0">
-            <h1 class="text-base font-medium text-slate-900 tracking-tight">{% block page_title %}Painel{% endblock %}
-            </h1>
+          <!-- Header Content -->
+          <div class="flex items-center justify-center lg:justify-start lg:gap-3">
+            <!-- Desktop: Breadcrumb -->
+            <div class="hidden lg:flex lg:items-center lg:gap-3">
+              <div class="text-xs text-slate-500">
+                {% block breadcrumb %}Painel{% endblock %}
+              </div>
+              <div class="text-xs text-slate-400">/</div>
+            </div>
+            <!-- Título (desktop e mobile) -->
+            <h1 class="text-base font-medium text-slate-900 tracking-tight">{% block page_title %}Painel{% endblock %}</h1>
           </div>
 
           <!-- Action (se precisar) -->
@@ -537,6 +553,36 @@ defined else None) %}
           <div
             class="rounded-md bg-white/90 backdrop-blur-xl border border-slate-300/70 shadow-lg px-4 py-3 text-sm text-slate-900">
             <span id="toast-msg"></span>
+          </div>
+        </div>
+
+        <!-- Share preview modal -->
+        <div id="shareModal" class="fixed inset-0 z-[99999] hidden">
+          <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+          <div class="absolute inset-0 p-4 flex items-center justify-center">
+            <div class="w-full max-w-md rounded-lg bg-white/95 backdrop-blur-2xl border border-slate-300/60 shadow-xl overflow-hidden">
+              <div class="px-4 py-3 border-b border-slate-200/60 flex items-center justify-between">
+                <div class="text-sm font-semibold text-slate-900">Prévia</div>
+                <button type="button" onclick="window.closeShareModal && window.closeShareModal()" class="w-9 h-9 rounded-md bg-white/70 hover:bg-white border border-slate-300/60 grid place-items-center">
+                  <i data-lucide="x" class="w-4 h-4 text-slate-700"></i>
+                </button>
+              </div>
+              <div class="p-4 space-y-3">
+                <img id="sharePreviewImg" alt="Prévia do compartilhamento" class="w-full rounded-md border border-slate-200/60 bg-white object-contain" />
+                <div class="text-[11px] text-slate-600">
+                  No celular (Chrome/Android) deve abrir o compartilhamento do WhatsApp. Se não abrir automaticamente, use a prévia para compartilhar manualmente.
+                </div>
+                <div class="flex gap-2">
+                  <button id="shareModalShareBtn" type="button" class="flex-1 h-10 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2">
+                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                    Compartilhar
+                  </button>
+                  <button id="shareModalDownloadBtn" type="button" class="h-10 px-4 rounded-md bg-white/70 hover:bg-white text-sm font-semibold text-slate-700 transition-all inline-flex items-center justify-center border border-slate-300/60">
+                    Baixar
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -795,6 +841,160 @@ defined else None) %}
       }
     };
 
+    // Share screenshot (Rankings)
+    // - Captura um container por id
+    // - Esconde elementos com data-share-hide="1" durante a captura
+    // - Se suportar Web Share (Android/WhatsApp), compartilha como imagem
+    // - Senão, baixa a imagem
+    window.shareScreenshot = async function (containerId, filename, titleText) {
+      try {
+        const el = document.getElementById(containerId);
+        if (!el) {
+          window.showToast && window.showToast("Não achei a área para compartilhar.");
+          return;
+        }
+
+        const toHide = Array.prototype.slice.call(el.querySelectorAll('[data-share-hide="1"]'));
+        toHide.forEach(n => n.classList.add("hidden"));
+
+        // garante que ícones estejam renderizados antes da captura
+        try { window.lucide && window.lucide.createIcons(); } catch (e) { }
+
+        const canvas = await window.html2canvas(el, {
+          backgroundColor: "#F5F5F7",
+          scale: 2,
+          useCORS: true,
+          scrollX: 0,
+          scrollY: 0,
+          onclone: function (doc) {
+            try {
+              const cloned = doc.getElementById(containerId);
+              if (!cloned) return;
+              // Evitar cortes por overflow e truncates
+              cloned.style.overflow = "visible";
+              cloned.querySelectorAll(".truncate").forEach(n => {
+                n.classList.remove("truncate");
+                n.style.overflow = "visible";
+                n.style.textOverflow = "clip";
+                n.style.whiteSpace = "normal";
+              });
+              // Tabelas dentro de overflow-x-auto: abrir overflow pra capturar tudo sem cortar
+              cloned.querySelectorAll(".overflow-x-auto").forEach(n => {
+                n.style.overflowX = "visible";
+                n.style.overflowY = "visible";
+              });
+            } catch (e) { }
+          },
+        });
+
+        toHide.forEach(n => n.classList.remove("hidden"));
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png", 1));
+        if (!blob) {
+          window.showToast && window.showToast("Não consegui gerar a imagem.");
+          return;
+        }
+
+        const file = new File([blob], filename || "ranking.png", { type: "image/png" });
+
+        // Sempre mostrar prévia (o usuário pediu para "aparecer a imagem")
+        const modal = document.getElementById("shareModal");
+        const img = document.getElementById("sharePreviewImg");
+        const btnShare = document.getElementById("shareModalShareBtn");
+        const btnDownload = document.getElementById("shareModalDownloadBtn");
+
+        const url = URL.createObjectURL(blob);
+        if (img) img.src = url;
+
+        window.closeShareModal = function () {
+          try { if (modal) modal.classList.add("hidden"); } catch (e) { }
+          try { URL.revokeObjectURL(url); } catch (e) { }
+        };
+
+        async function tryShareFiles() {
+          try {
+            if (!navigator.share) return false;
+            // Em muitos navegadores, compartilhar arquivo só funciona em contexto seguro (HTTPS/localhost)
+            if (window.isSecureContext !== true) return false;
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+              await navigator.share({
+                files: [file],
+                title: titleText || "Ranking",
+                text: titleText || "Ranking",
+              });
+              window.closeShareModal && window.closeShareModal();
+              return true;
+            }
+            return false;
+          } catch (e) {
+            return false;
+          }
+        }
+
+        async function tryShareText() {
+          try {
+            if (!navigator.share) return false;
+            await navigator.share({
+              title: titleText || "Ranking",
+              text: (titleText || "Ranking") + " (imagem na prévia)",
+              url: window.location.href,
+            });
+            return true;
+          } catch (e) {
+            return false;
+          }
+        }
+
+        if (btnShare) {
+          btnShare.onclick = async function () {
+            const okFiles = await tryShareFiles();
+            if (okFiles) return;
+
+            // fallback: tenta ao menos abrir o menu de compartilhar (WhatsApp) com texto/link
+            const okText = await tryShareText();
+            if (okText) {
+              window.showToast && window.showToast("Abrindo compartilhamento (texto/link). Para enviar a imagem, use a prévia.");
+              return;
+            }
+
+            // sem share API
+            const msg = (window.isSecureContext === true)
+              ? "Seu navegador não permite compartilhar imagem direto. Use a prévia."
+              : "Para compartilhar imagem direto no WhatsApp, geralmente precisa abrir em HTTPS (não em http://IP). Use a prévia.";
+            window.showToast && window.showToast(msg);
+          };
+        }
+        if (btnDownload) {
+          btnDownload.onclick = function () {
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename || "ranking.png";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          };
+        }
+
+        if (modal) modal.classList.remove("hidden");
+        try { window.lucide && window.lucide.createIcons(); } catch (e) { }
+
+        // Tenta abrir o compartilhamento automaticamente (quando suportado)
+        const shared = await tryShareFiles();
+        if (!shared) {
+          // mantém a prévia aberta para o usuário
+          const msg = (window.isSecureContext === true)
+            ? "Prévia gerada. Toque em Compartilhar."
+            : "Prévia gerada. Para compartilhar imagem direto no WhatsApp, use HTTPS; senão use a prévia.";
+          window.showToast && window.showToast(msg);
+        }
+      } catch (e) {
+        try {
+          window.showToast && window.showToast("Falha ao compartilhar. Tente novamente.");
+        } catch (_) { }
+        console.error("shareScreenshot error:", e);
+      }
+    };
+
     // Dropdown (select → custom)
     function safeInitSelectDropdowns(root) {
       try {
@@ -806,6 +1006,7 @@ defined else None) %}
 
           const wrapper = document.createElement("div");
           wrapper.className = "relative";
+          wrapper.style.zIndex = "9998";
           sel.parentNode.insertBefore(wrapper, sel);
           wrapper.appendChild(sel);
 
@@ -816,8 +1017,14 @@ defined else None) %}
           wrapper.appendChild(btn);
 
           const panel = document.createElement("div");
-          panel.className = "absolute z-50 w-full mt-1 rounded-md bg-white/95 backdrop-blur-2xl border border-slate-300/70 shadow-lg max-h-60 overflow-auto hidden";
+          // IMPORTANTE: precisa da classe dropdown-panel para conseguirmos fechar outros dropdowns abertos
+          panel.className = "dropdown-panel absolute w-full mt-1 rounded-md bg-white/95 backdrop-blur-2xl border border-slate-300/70 shadow-lg max-h-60 overflow-auto hidden";
+          panel.style.zIndex = "99999";
+          panel.style.position = "absolute";
+          wrapper.style.zIndex = "99998";
           wrapper.appendChild(panel);
+          // Guardar "dono" do painel (pra conseguir devolver ao lugar quando estiver portaled no body)
+          panel.__ddOwner = wrapper;
 
           function updatePanel() {
             panel.innerHTML = "";
@@ -833,6 +1040,14 @@ defined else None) %}
                 sel.dispatchEvent(new Event("change", { bubbles: true }));
                 btn.querySelector("span").textContent = opt.text;
                 panel.classList.add("hidden");
+                panel.style.position = "absolute";
+                panel.style.top = "";
+                panel.style.left = "";
+                panel.style.width = "";
+                // Devolver do portal (body) para o wrapper original
+                if (panel.__ddOwner && panel.parentNode !== panel.__ddOwner) {
+                  panel.__ddOwner.appendChild(panel);
+                }
               });
               panel.appendChild(item);
             }
@@ -843,9 +1058,55 @@ defined else None) %}
           btn.addEventListener("click", function (e) {
             e.stopPropagation();
             const isHidden = panel.classList.contains("hidden");
-            document.querySelectorAll(".dropdown-panel").forEach(p => p.classList.add("hidden"));
+            document.querySelectorAll(".dropdown-panel").forEach(p => {
+              p.classList.add("hidden");
+              p.style.position = "absolute";
+              p.style.top = "";
+              p.style.left = "";
+              p.style.width = "";
+              // Se o painel estiver portaled no body, devolve pro wrapper original
+              if (p.__ddOwner && p.parentNode !== p.__ddOwner) {
+                p.__ddOwner.appendChild(p);
+              }
+            });
             if (isHidden) {
+              // Quando abrir, usar portal no body + position:fixed para garantir que fique acima de tudo
+              const rect = wrapper.getBoundingClientRect();
+              if (panel.parentNode !== document.body) {
+                document.body.appendChild(panel);
+              }
+              panel.style.position = "fixed";
+              // position:fixed usa coordenadas do viewport (não somar scrollY)
+              panel.style.top = (rect.bottom + 4) + "px";
+              panel.style.left = rect.left + "px";
+              panel.style.width = rect.width + "px";
               panel.classList.remove("hidden");
+            } else {
+              panel.classList.add("hidden");
+              panel.style.position = "absolute";
+              panel.style.top = "";
+              panel.style.left = "";
+              panel.style.width = "";
+              if (panel.__ddOwner && panel.parentNode !== panel.__ddOwner) {
+                panel.__ddOwner.appendChild(panel);
+              }
+            }
+          });
+          
+          // Ajustar posição quando a janela for redimensionada ou rolada
+          window.addEventListener("scroll", function() {
+            if (!panel.classList.contains("hidden")) {
+              const rect = wrapper.getBoundingClientRect();
+              panel.style.top = (rect.bottom + 4) + "px";
+              panel.style.left = rect.left + "px";
+              panel.style.width = rect.width + "px";
+            }
+          }, true);
+          
+          window.addEventListener("resize", function() {
+            if (!panel.classList.contains("hidden")) {
+              const rect = wrapper.getBoundingClientRect();
+              panel.style.width = rect.width + "px";
             }
           });
 
@@ -854,7 +1115,16 @@ defined else None) %}
           });
 
           document.addEventListener("click", function () {
-            panel.classList.add("hidden");
+            if (!panel.classList.contains("hidden")) {
+              panel.classList.add("hidden");
+              panel.style.position = "absolute";
+              panel.style.top = "";
+              panel.style.left = "";
+              panel.style.width = "";
+              if (panel.__ddOwner && panel.parentNode !== panel.__ddOwner) {
+                panel.__ddOwner.appendChild(panel);
+              }
+            }
           });
 
           sel.addEventListener("change", updatePanel);

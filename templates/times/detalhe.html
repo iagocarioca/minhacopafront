@@ -4,93 +4,155 @@
 {% block page_title %}Time{% endblock %}
 {% block content %}
 {% if temporada_id %}<div data-temporada-id="{{ temporada_id }}" class="hidden"></div>{% endif %}
-<div class="mb-4">
-  <div class="flex items-center justify-between gap-3">
-    <div class="flex-1">
-      <h2 class="text-lg font-semibold text-slate-900">{{ time.nome }}</h2>
-      <div class="mt-1 text-sm text-slate-600 flex items-center gap-2 flex-wrap">
-        <span class="inline-flex items-center gap-2 text-[11px] px-2 py-0.5 rounded-full bg-white/60 border border-slate-300/60 text-slate-700">
-          <i data-lucide="hash" class="w-3.5 h-3.5"></i>
-          {{ time.id }}
-        </span>
-        {% if time.cor %}
-          <span class="inline-flex items-center gap-2 text-[11px] px-2 py-0.5 rounded-full bg-white/60 border border-slate-300/60 text-slate-700">
-            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
-            {{ time.cor }}
-          </span>
+
+<!-- Header do Time (melhorado e responsivo) -->
+<div class="mb-6 rounded-lg bg-gradient-to-br from-white/80 to-white/40 backdrop-blur-xl border border-slate-300/60 p-4 sm:p-5">
+  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-4 flex-1 min-w-0">
+      <!-- Escudo -->
+      <div class="flex-shrink-0">
+        {% if time.escudo_url %}
+          <img src="/media/{{ time.escudo_url[1:] if time.escudo_url.startswith('/') else time.escudo_url }}" alt="{{ time.nome }}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border-2 border-slate-300/60 shadow-sm" />
+        {% else %}
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-600 border-2 border-yellow-300/60 grid place-items-center text-white shadow-sm">
+            <i data-lucide="shirt" class="w-8 h-8 sm:w-10 sm:h-10"></i>
+          </div>
         {% endif %}
       </div>
-    </div>
-    <div class="flex items-center gap-2">
-      {% if time.escudo_url %}
-        <img src="http://192.168.18.38:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-11 h-11 rounded-lg object-cover border border-slate-300/60" />
-      {% else %}
-        <div class="w-11 h-11 rounded-lg bg-yellow-50/70 border border-yellow-300/60 grid place-items-center text-yellow-600">
-          <i data-lucide="shirt" class="w-5 h-5"></i>
+      <!-- Nome e Info -->
+      <div class="flex-1 min-w-0">
+        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2 truncate">{{ time.nome }}</h2>
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-slate-100/80 border border-slate-300/60 text-slate-700 font-medium">
+            <i data-lucide="hash" class="w-3 h-3"></i>
+            ID: {{ time.id }}
+          </span>
+          {% if time.cor %}
+            <span class="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-slate-100/80 border border-slate-300/60 text-slate-700 font-medium">
+              <span class="w-2 h-2 rounded-full bg-slate-500"></span>
+              {{ time.cor }}
+            </span>
+          {% endif %}
+          {% if time.jogadores %}
+            <span class="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full bg-emerald-50/80 border border-emerald-300/60 text-emerald-700 font-medium">
+              <i data-lucide="users" class="w-3 h-3"></i>
+              {{ (time.jogadores or [])|length }} jogador{{ 'es' if (time.jogadores or [])|length != 1 else '' }}
+            </span>
+          {% endif %}
         </div>
-      {% endif %}
-      <button onclick="openEditModal()" class="w-10 h-10 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 grid place-items-center text-slate-700 transition-all">
-        <i data-lucide="settings" class="w-4 h-4"></i>
-      </button>
+      </div>
     </div>
+    <!-- Botão de Configurações -->
+    <button onclick="openEditModal()" class="w-11 h-11 rounded-lg bg-white/60 backdrop-blur-xl border border-slate-300/60 hover:bg-white/80 hover:border-slate-400/60 grid place-items-center text-slate-700 transition-all shadow-sm flex-shrink-0">
+      <i data-lucide="settings" class="w-5 h-5"></i>
+    </button>
   </div>
 </div>
 
-<!-- Botão para expandir formulário de adicionar jogador -->
-{% if jogadores_disponiveis %}
-<div class="mb-4">
-  <button id="btnAdicionarJogador" onclick="toggleAddJogadorForm()" class="w-full h-11 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
-    <i data-lucide="plus" class="w-4 h-4"></i>
+<!-- Formulário de Adicionar Jogador (melhorado) -->
+{% if jogadores_disponiveis and jogadores_disponiveis|length > 0 %}
+<div class="mb-6">
+  <button id="btnAdicionarJogador" onclick="toggleAddJogadorForm()" class="w-full h-12 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2 shadow-sm">
+    <i data-lucide="plus" class="w-5 h-5"></i>
     Adicionar Jogador
   </button>
 
   <!-- Formulário (inicialmente oculto) -->
-  <div id="formAdicionarJogador" class="hidden mt-3 p-4 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60">
+  <div id="formAdicionarJogador" class="hidden mt-4 rounded-lg bg-white/60 backdrop-blur-xl border border-slate-300/60 p-5 shadow-sm">
+    <div class="mb-4">
+      <h3 class="text-base font-semibold text-slate-900 inline-flex items-center gap-2">
+        <i data-lucide="user-plus" class="w-4 h-4"></i>
+        Novo Jogador
+      </h3>
+      <p class="text-xs text-slate-500 mt-1">Adicione um jogador à escalação do time</p>
+    </div>
+    
     <form method="post" 
           hx-post="{{ url_for('times.detalhe', time_id=time.id) }}"
           hx-target="#jogadores-list"
           hx-swap="innerHTML"
           hx-on--after-swap="updateJogadoresCount(); toggleAddJogadorForm();"
           hx-on::after-request="if(event.detail.successful) { this.reset(); }"
-          class="space-y-3">
+          class="space-y-4">
       <input type="hidden" name="action" value="add">
 
       <div>
-        <label class="block text-xs font-medium text-slate-700 mb-1.5">Jogador</label>
-        <select name="jogador_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
+        <label class="block text-xs font-semibold text-slate-700 mb-2 inline-flex items-center gap-1.5">
+          <i data-lucide="user" class="w-3.5 h-3.5"></i>
+          Jogador
+        </label>
+        <!-- Campo de busca -->
+        <input 
+          type="text" 
+          id="buscaJogador" 
+          placeholder="Buscar por nome ou apelido..." 
+          class="w-full text-sm px-4 py-2.5 rounded-lg bg-white/80 backdrop-blur-xl border border-slate-300/60 hover:border-slate-400/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all mb-2"
+        />
+        <!-- Select com todos os jogadores (inicialmente oculto, usado para filtro) -->
+        <select 
+          name="jogador_id" 
+          id="selectJogador" 
+          required 
+          class="w-full text-sm px-4 py-3 rounded-lg bg-white/80 backdrop-blur-xl border border-slate-300/60 hover:border-slate-400/60 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all"
+        >
           <option value="">Escolha um jogador</option>
           {% for j in jogadores_disponiveis %}
-            <option value="{{j.id}}">{{ j.apelido or j.nome_completo }}{% if j.telefone %} ({{ j.telefone }}){% endif %}</option>
+            <option 
+              value="{{j.id}}" 
+              data-nome="{{ (j.apelido or j.nome_completo)|lower }}"
+              data-apelido="{{ (j.apelido or '')|lower }}"
+              data-nome-completo="{{ (j.nome_completo or '')|lower }}"
+            >
+              {{ j.apelido or j.nome_completo }}{% if j.telefone %} ({{ j.telefone }}){% endif %}
+            </option>
           {% endfor %}
         </select>
       </div>
 
       <div>
-        <label class="block text-xs font-medium text-slate-700 mb-1.5">Posição (opcional)</label>
-        <input name="posicao" placeholder="Ex: Atacante, Goleiro, Defesa..." class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40" />
+        <label class="block text-xs font-semibold text-slate-700 mb-2 inline-flex items-center gap-1.5">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+          Posição (opcional)
+        </label>
+        <input name="posicao" placeholder="Ex: Atacante, Goleiro, Defesa..." class="w-full text-sm px-4 py-3 rounded-lg bg-white/80 backdrop-blur-xl border border-slate-300/60 hover:border-slate-400/60 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50 transition-all" />
       </div>
 
-      <label class="flex items-center gap-3 px-3 py-2 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border cursor-pointer transition-all">
-        <input type="checkbox" name="capitao" class="rounded border-slate-300 text-primary-600 focus:ring-primary-500/20">
-        <span class="text-sm font-medium text-slate-900">Definir como capitão</span>
+      <label class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/80 backdrop-blur-xl border border-slate-300/60 hover:border-slate-400/60 cursor-pointer transition-all">
+        <input type="checkbox" name="capitao" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/30 w-4 h-4">
+        <div class="flex items-center gap-2 flex-1">
+          <i data-lucide="star" class="w-4 h-4 text-yellow-600"></i>
+          <span class="text-sm font-medium text-slate-900">Definir como capitão</span>
+        </div>
       </label>
 
-      <div class="flex gap-2">
-        <button type="submit" class="flex-1 h-10 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
-          <i data-lucide="plus" class="w-4 h-4"></i>
+      <div class="flex flex-col sm:flex-row gap-2 pt-2">
+        <button type="submit" class="flex-1 h-11 rounded-lg bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold transition-all inline-flex items-center justify-center gap-2 shadow-sm">
+          <i data-lucide="check" class="w-4 h-4"></i>
           Adicionar
         </button>
-        <button type="button" onclick="toggleAddJogadorForm()" class="h-10 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
+        <button type="button" onclick="toggleAddJogadorForm()" class="h-11 px-6 rounded-lg bg-white/80 backdrop-blur-xl border border-slate-300/60 hover:bg-white hover:border-slate-400/60 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
           Cancelar
         </button>
       </div>
     </form>
   </div>
 </div>
+{% elif jogadores_disponiveis is defined and jogadores_disponiveis|length == 0 %}
+<div class="mb-6 rounded-lg bg-slate-50/60 backdrop-blur-xl border border-slate-300/60 p-4">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-lg bg-slate-100/80 border border-slate-300/60 grid place-items-center text-slate-600 flex-shrink-0">
+      <i data-lucide="info" class="w-5 h-5"></i>
+    </div>
+    <div class="flex-1">
+      <div class="text-sm font-semibold text-slate-900">Nenhum jogador disponível</div>
+      <div class="text-xs text-slate-600 mt-0.5">Todos os jogadores já estão escalados em outros times.</div>
+    </div>
+  </div>
+</div>
 {% endif %}
 
-{% call card("Escalação do Time", (time.jogadores or [])|length ~ " jogadores", "users", "blue") %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[600px] overflow-y-auto pr-2" id="jogadores-list">
+{% call card("Escalação do Time", (time.jogadores or [])|length ~ " jogador" ~ ("es" if (time.jogadores or [])|length != 1 else ""), "users", "blue") %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full" id="jogadores-list">
       {% include "times/_jogadores_list.html" %}
     </div>
   {% endcall %}
@@ -112,7 +174,7 @@
           <label class="block text-xs font-medium text-slate-700 mb-2">Escudo do Time</label>
           {% if time.escudo_url %}
             <div class="mb-3 flex justify-center">
-              <img src="http://192.168.18.38:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-24 h-24 rounded-md object-cover border border-slate-300/60" />
+              <img src="/media/{{ time.escudo_url[1:] if time.escudo_url.startswith('/') else time.escudo_url }}" alt="{{ time.nome }}" class="w-24 h-24 rounded-xl object-cover border-2 border-slate-300/60 shadow-sm" />
             </div>
           {% endif %}
           <input type="file" name="escudo" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100" />
@@ -168,10 +230,23 @@ document.addEventListener('keydown', function(e) {
 function toggleAddJogadorForm() {
   const form = document.getElementById('formAdicionarJogador');
   const btn = document.getElementById('btnAdicionarJogador');
+  const buscaInput = document.getElementById('buscaJogador');
+  const selectJogador = document.getElementById('selectJogador');
   
   if (form.classList.contains('hidden')) {
     form.classList.remove('hidden');
     btn.classList.add('hidden');
+    // Limpa a busca quando abre o formulário
+    if (buscaInput) {
+      buscaInput.value = '';
+      // Mostra todas as opções novamente
+      if (selectJogador) {
+        const options = selectJogador.querySelectorAll('option');
+        options.forEach(option => {
+          option.style.display = '';
+        });
+      }
+    }
     // Inicializar ícones do Lucide após mostrar o formulário
     if (typeof lucide !== 'undefined') {
       lucide.createIcons();
@@ -186,7 +261,8 @@ function updateJogadoresCount() {
   const list = document.getElementById('jogadores-list');
   if (!list) return;
   
-  const jogadores = list.querySelectorAll('.rounded-lg.bg-white\\/40');
+  // Busca por qualquer div que seja um card de jogador (não o estado vazio)
+  const jogadores = list.querySelectorAll('.rounded-xl.bg-white\\/60:not(.col-span-full)');
   const count = jogadores.length;
   
   // Atualiza o subtítulo do card
@@ -204,12 +280,181 @@ function updateJogadoresCount() {
   }
 }
 
+// Toggle do formulário de edição de jogador
+function toggleEditJogador(jogadorId) {
+  const editForm = document.getElementById(`edit-form-${jogadorId}`);
+  const editBtn = document.getElementById(`btn-edit-${jogadorId}`);
+  const form = document.getElementById(`form-edit-${jogadorId}`);
+  const input = document.getElementById(`input-posicao-${jogadorId}`);
+  
+  if (!editForm || !editBtn) return;
+  
+  if (editForm.classList.contains('hidden')) {
+    // Abre o formulário
+    editForm.classList.remove('hidden');
+    // Muda o botão para check (salvar)
+    editBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+    editBtn.classList.remove('hover:bg-blue-50', 'hover:border-blue-300/60', 'hover:text-blue-700');
+    editBtn.classList.add('bg-emerald-500', 'border-emerald-500', 'text-white', 'hover:bg-emerald-600');
+    editBtn.title = 'Salvar';
+    editBtn.onclick = function() {
+      if (form) {
+        form.requestSubmit();
+      }
+    };
+    // Foca no campo de posição
+    if (input) {
+      setTimeout(() => input.focus(), 100);
+    }
+    // Salva ao pressionar Enter
+    if (input) {
+      input.onkeydown = function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (form) {
+            form.requestSubmit();
+          }
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          toggleEditJogador(jogadorId);
+        }
+      };
+    }
+  } else {
+    // Fecha o formulário
+    editForm.classList.add('hidden');
+    // Volta o botão para editar
+    editBtn.innerHTML = '<i data-lucide="pencil" class="w-4 h-4"></i>';
+    editBtn.classList.remove('bg-emerald-500', 'border-emerald-500', 'text-white', 'hover:bg-emerald-600');
+    editBtn.classList.add('hover:bg-blue-50', 'hover:border-blue-300/60', 'hover:text-blue-700');
+    editBtn.title = 'Editar posição';
+    editBtn.onclick = function() {
+      toggleEditJogador(jogadorId);
+    };
+    if (input) {
+      input.onkeydown = null;
+    }
+  }
+  
+  // Re-inicializa os ícones Lucide
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+}
+
+// Busca de jogadores no select
+function initJogadorSearch() {
+  const buscaInput = document.getElementById('buscaJogador');
+  const selectJogador = document.getElementById('selectJogador');
+  
+  if (!buscaInput || !selectJogador) return;
+  
+  buscaInput.addEventListener('input', function(e) {
+    const termo = e.target.value.toLowerCase().trim();
+    const options = selectJogador.querySelectorAll('option');
+    
+    let encontrou = false;
+    options.forEach(option => {
+      if (option.value === '') {
+        // Mantém a opção vazia sempre visível
+        return;
+      }
+      
+      const nome = option.getAttribute('data-nome') || '';
+      const apelido = option.getAttribute('data-apelido') || '';
+      const nomeCompleto = option.getAttribute('data-nome-completo') || '';
+      
+      // Verifica se o termo está em qualquer um dos campos
+      const match = !termo || 
+                    nome.includes(termo) || 
+                    apelido.includes(termo) || 
+                    nomeCompleto.includes(termo);
+      
+      if (match) {
+        option.style.display = '';
+        if (!encontrou && termo) {
+          encontrou = true;
+        }
+      } else {
+        option.style.display = 'none';
+      }
+    });
+    
+    // Se não encontrou nenhum, mostra mensagem
+    if (termo && !encontrou) {
+      // Adiciona uma opção temporária de "não encontrado"
+      let noResult = selectJogador.querySelector('option[value="__no_result__"]');
+      if (!noResult) {
+        noResult = document.createElement('option');
+        noResult.value = '__no_result__';
+        noResult.disabled = true;
+        noResult.textContent = 'Nenhum jogador encontrado';
+        selectJogador.appendChild(noResult);
+      }
+      noResult.style.display = '';
+    } else {
+      // Remove a opção de "não encontrado" se existir
+      const noResult = selectJogador.querySelector('option[value="__no_result__"]');
+      if (noResult) {
+        noResult.remove();
+      }
+    }
+  });
+  
+  // Limpa a busca quando o formulário é resetado
+  const form = buscaInput.closest('form');
+  if (form) {
+    form.addEventListener('reset', function() {
+      buscaInput.value = '';
+      const options = selectJogador.querySelectorAll('option');
+      options.forEach(option => {
+        option.style.display = '';
+      });
+    });
+  }
+}
+
 // Inicializa o contador ao carregar
 document.addEventListener('DOMContentLoaded', function() {
   updateJogadoresCount();
+  initJogadorSearch();
   if (typeof lucide !== 'undefined') {
     lucide.createIcons();
   }
 });
 </script>
+
+<style>
+/* Scrollbar customizado para a lista de jogadores */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.5);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.7);
+}
+
+/* Garantir que não haja scroll horizontal */
+#jogadores-list {
+  overflow-x: hidden !important;
+}
+
+#jogadores-list > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+</style>
 {% endblock %}

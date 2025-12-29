@@ -19,8 +19,9 @@
 {% call card("Votar", "Selecione até 3 jogadores", "vote", "green") %}
 <form method="post" class="space-y-3" id="voteForm">
   <div>
-    <label class="block text-xs font-medium text-slate-700 mb-1.5">Seu número <span class="text-rose-600">*</span></label>
-    <input name="jogador_votante_id" type="number" min="1" placeholder="Número do jogador" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+    <label class="block text-xs font-medium text-slate-700 mb-1.5">Seu nome <span class="text-rose-600">*</span></label>
+    <input name="jogador_votante_nome" type="text" placeholder="Digite seu nome ou apelido" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30" />
+    <div class="text-[11px] text-slate-500 mt-1">Busca flexível por nome ou apelido</div>
   </div>
 
   <div class="flex items-center justify-between text-xs px-3 py-2 rounded-md bg-slate-50/60">
@@ -41,7 +42,7 @@
           <input type="checkbox" class="voteCheck rounded border-slate-300 text-emerald-600 focus:ring-emerald-500/30" name="jogador_votado_ids" value="{{ j.id }}">
           <div class="flex items-center gap-2 flex-1 min-w-0">
             {% if j.foto_url %}
-              <img src="http://192.168.18.38:5001{{ j.foto_url }}" alt="{{ j.nome }}" class="w-7 h-7 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
+              <img src="/media/{{ j.foto_url[1:] if j.foto_url.startswith('/') else j.foto_url }}" alt="{{ j.nome }}" class="w-7 h-7 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
             {% else %}
               <div class="w-7 h-7 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center flex-shrink-0">
                 <i data-lucide="user" class="w-3.5 h-3.5 text-white"></i>
@@ -50,7 +51,7 @@
             <div class="min-w-0 flex-1">
               <div class="text-sm font-medium text-slate-900 truncate">{{ j.nome }}</div>
               <div class="text-[11px] text-slate-500 truncate">
-                {{ j.time_nome }}{% if j.posicao_nome and j.posicao_nome != "Sem posição" %} • {{ j.posicao_nome }}{% endif %}
+                {{ j.time_nome }}
               </div>
             </div>
           </div>

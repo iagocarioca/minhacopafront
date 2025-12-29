@@ -1,4 +1,6 @@
-from flask import Flask, redirect, url_for, session, request, render_template, flash
+from flask import Flask, redirect, url_for, session, request, render_template, flash, Response
+import requests
+from services.api_client import API_BASE
 from services.api_client import ApiError
 from routes.auth import auth_bp
 from routes.peladas import peladas_bp
@@ -13,6 +15,28 @@ from routes.votacoes import votacoes_bp
 def create_app():
     app = Flask(__name__)
     app.secret_key = "super-secret-key"  # troque em prod
+
+    @app.get("/media/<path:subpath>")
+    def media_proxy(subpath: str):
+        """
+        Proxy de imagens do backend (API_BASE) para o mesmo host do front.
+        Isso permite capturar screenshots (html2canvas) sem bloquear imagens por CORS.
+        Funciona sem autenticação para permitir acesso público.
+        """
+        # allowlist simples
+        if not subpath.startswith("static/"):
+            return ("Not found", 404)
+        try:
+            url = f"{API_BASE}/{subpath}"
+            # Não envia token de autenticação para permitir acesso público
+            r = requests.get(url, timeout=20)
+            resp = Response(r.content, status=r.status_code)
+            ct = r.headers.get("Content-Type") or "application/octet-stream"
+            resp.headers["Content-Type"] = ct
+            resp.headers["Cache-Control"] = "public, max-age=86400"
+            return resp
+        except Exception:
+            return ("Not found", 404)
     
     # Filtro Jinja2 para criar slug do nome
     @app.template_filter('slug')
@@ -74,6 +98,8 @@ def create_app():
         public_prefixes = ["/peladas/", "/static/"]
         if request.path.startswith("/static/"):
             return None
+        if request.path.startswith("/media/"):
+            return None  # Permitir acesso público às imagens
         if request.path in public_paths:
             return None
         # Permitir acesso público ao perfil público da pelada (por ID ou nome)
@@ -81,6 +107,11 @@ def create_app():
             return None
         if request.path.startswith("/perfil/"):
             return None
+        # Permitir acesso público às rotas de votação
+        if request.path.startswith("/votacoes/"):
+            # Rotas públicas de votação: votar e resultado
+            if "/votar" in request.path or "/resultado" in request.path:
+                return None
         if request.path == "/":
             return redirect(url_for("peladas.list_create"))
         if not session.get("access_token"):
@@ -136,6 +167,9 @@ def create_app():
 
     @app.errorhandler(404)
     def handle_404(_err):
+        # Se não estiver autenticado, redireciona para login
+        if not session.get("access_token"):
+            return redirect(url_for("auth.login"))
         # toast + página amigável (para links quebrados)
         flash("Página não encontrada.", "error")
         return render_template(
@@ -147,6 +181,9 @@ def create_app():
 
     @app.errorhandler(500)
     def handle_500(_err):
+        # Se não estiver autenticado, redireciona para login
+        if not session.get("access_token"):
+            return redirect(url_for("auth.login"))
         flash("Erro interno. Tente novamente.", "error")
         return render_template(
             "errors/error.html",
@@ -157,6 +194,9 @@ def create_app():
 
     @app.errorhandler(Exception)
     def handle_unexpected(err: Exception):
+        # Se não estiver autenticado, redireciona para login
+        if not session.get("access_token"):
+            return redirect(url_for("auth.login"))
         # fallback: evita página de erro crua
         flash("Ops! Algo deu errado. Tente novamente.", "error")
         # Em POST/PUT, melhor redirecionar de volta; em GET, renderiza página

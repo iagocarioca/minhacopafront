@@ -6,7 +6,7 @@
 <!-- Capa de perfil -->
 {% if pelada.perfil_url %}
   <div class="mb-6 -mx-6 sm:-mx-8 lg:-mx-12">
-    <img src="http://192.168.18.38:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
+    <img src="http://192.168.18.162:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
   </div>
 {% endif %}
 
@@ -14,7 +14,7 @@
   <div class="flex items-center justify-between gap-3">
     <div class="flex items-center gap-3 flex-1">
       {% if pelada.logo_url %}
-        <img src="http://192.168.18.38:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+        <img src="http://192.168.18.162:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
       {% else %}
         <img src="{{ url_for('static', filename='imgs/logo.png') }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
       {% endif %}
@@ -36,12 +36,16 @@
         </div>
       </div>
     </div>
-    <div class="flex items-center gap-3">
-      <a href="/perfil/{{ pelada.nome | slug }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary-50/80 hover:bg-primary-50 text-primary-700 text-xs font-semibold transition-all">
-        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-        Ver perfil público
-      </a>
-    </div>
+  </div>
+  <div class="flex items-center gap-3 mb-6">
+    <a href="/perfil/{{ pelada.nome | slug }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary-50/80 hover:bg-primary-50 text-primary-700 text-xs font-semibold transition-all">
+      <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+      Ver perfil público
+    </a>
+    <a href="/peladas/{{ pelada.id }}/scout-anual" class="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-yellow-50/80 hover:bg-yellow-50 text-yellow-700 text-xs font-semibold transition-all">
+      <i data-lucide="award" class="w-3.5 h-3.5"></i>
+      Scout Anual
+    </a>
   </div>
 </div>
 

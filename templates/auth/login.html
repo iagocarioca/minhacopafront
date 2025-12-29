@@ -2,6 +2,9 @@
 {% from "layout/card.html" import card %}
 {% block content %}
 <div class="max-w-md mx-auto mt-12">
+  <div class="flex justify-center mb-8">
+    <img src="{{ url_for('static', filename='imgs/logo.png') }}" alt="Logo" class="w-24 h-24 object-contain flex-shrink-0 max-w-full" />
+  </div>
   {% call card("Bem-vindo ao EFootBool", "Entre com suas credenciais", "log-in", "blue") %}
   <form method="post" class="space-y-3">
     <div>

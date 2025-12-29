@@ -4,7 +4,24 @@
 {% block breadcrumb %}Temporada • Rankings{% endblock %}
 {% block page_title %}Artilheiros{% endblock %}
 
+{% block header_action %}
+<button type="button" data-share-hide="1" onclick="shareScreenshot('capture-artilheiros', 'ranking-artilheiros.png', 'Ranking de Artilharia')"
+  class="h-10 px-3 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-xs font-semibold text-slate-700 transition-all inline-flex items-center gap-2 border border-slate-300/60">
+  <i data-lucide="share-2" class="w-4 h-4"></i>
+  Compartilhar
+</button>
+{% endblock %}
+
 {% block content %}
+<div class="md:hidden mb-3">
+  <button type="button" data-share-hide="1" onclick="shareScreenshot('capture-artilheiros', 'ranking-artilheiros.png', 'Ranking de Artilharia')"
+    class="w-full h-11 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2 border border-slate-300/60">
+    <i data-lucide="share-2" class="w-4 h-4"></i>
+    Compartilhar
+  </button>
+</div>
+
+<div id="capture-artilheiros">
 {% set cols = [
   {"label":"#","class":"text-left py-3 px-3 text-slate-500 font-semibold w-10"},
   {"label":"Jogador","class":"text-left py-3 px-3 text-slate-500 font-semibold"},
@@ -16,13 +33,15 @@
   {% set j = item.jogador if item.jogador is defined else item %}
   {% set foto_html = '' %}
   {% if j.foto_url %}
-    {% set foto_html = '<img src="http://192.168.18.38:5001' ~ j.foto_url ~ '" alt="' ~ (j.apelido or j.nome_completo) ~ '" class="w-8 h-8 rounded-md object-cover border border-slate-300/60 inline-block mr-2 align-middle" />' %}
+    {% set foto_html = '<img src="/media/' ~ (j.foto_url[1:] if j.foto_url.startswith("/") else j.foto_url) ~ '" alt="' ~ (j.apelido or j.nome_completo) ~ '" class="w-8 h-8 rounded-md object-cover border border-slate-300/60 inline-block mr-2 align-middle" />' %}
   {% else %}
     {% set foto_html = '<div class="w-8 h-8 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center inline-block mr-2 align-middle"><i data-lucide="user" class="w-4 h-4 text-white"></i></div>' %}
   {% endif %}
+  {% set nome = (j.apelido or j.nome_completo or "Jogador") %}
+  {% set nome_html = ('<div class="inline-flex items-center gap-2 min-w-0 whitespace-nowrap align-middle">' ~ foto_html ~ '<span class="truncate max-w-[220px] align-middle">' ~ nome ~ '</span></div>') %}
   {% set _ = rows.append([
     {"value": (item.posicao if item.posicao is defined else loop.index), "class":"py-3 px-3 font-medium text-slate-700"},
-    {"value": (foto_html ~ '<span class="align-middle">' ~ (j.apelido or j.nome_completo or "Jogador") ~ '</span>')|safe, "class":"py-3 px-3 font-semibold text-slate-900"},
+    {"value": nome_html|safe, "class":"py-3 px-3 font-semibold text-slate-900 whitespace-nowrap"},
     {"value": (j.total_gols or item.gols or item.total_gols or 0), "class":"py-3 px-3 text-right font-medium text-slate-900"},
   ]) %}
 {% endfor %}
@@ -36,4 +55,5 @@
 {% endif %}
 
 {{ ranking_table("Artilheiros", "Top " ~ limit ~ " destaques", cols, rows, "soccer-ball", "purple") }}
+</div>
 {% endblock %}

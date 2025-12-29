@@ -52,6 +52,36 @@ def detalhe(time_id: int):
                     time = svc.obter_time(time_id).get("time")
                     return render_template("times/_jogadores_list.html", time=time)
                 flash("Jogador removido!", "ok")
+            elif action == "update":
+                # Atualiza a posição do jogador
+                jogador_id = int(request.form.get("jogador_id"))
+                nova_posicao = request.form.get("posicao", "").strip() or None
+                # Busca o jogador atual para manter os outros dados
+                time_atual = svc.obter_time(time_id).get("time")
+                jogador_atual = None
+                if time_atual and time_atual.get("jogadores"):
+                    for j in time_atual["jogadores"]:
+                        if j.get("id") == jogador_id:
+                            jogador_atual = j
+                            break
+                
+                # Remove e readiciona com a nova posição (ou atualiza se houver endpoint específico)
+                if jogador_atual:
+                    # Remove o jogador
+                    svc.remover_jogador(time_id, jogador_id)
+                    # Readiciona com a nova posição
+                    svc.adicionar_jogador(
+                        time_id=time_id,
+                        jogador_id=jogador_id,
+                        capitao=jogador_atual.get("capitao", False),
+                        posicao=nova_posicao
+                    )
+                
+                if is_htmx:
+                    # Retorna apenas a lista de jogadores atualizada
+                    time = svc.obter_time(time_id).get("time")
+                    return render_template("times/_jogadores_list.html", time=time)
+                flash("Posição atualizada!", "ok")
             elif action == "update_escudo":
                 escudo_file = request.files.get("escudo")
                 if escudo_file and escudo_file.filename:
@@ -80,6 +110,45 @@ def detalhe(time_id: int):
         temporada = temp_svc.obter_temporada(temporada_id).get("temporada", {})
         pelada_id = temporada.get("pelada_id")
         if pelada_id:
-            jogadores_disponiveis = jogador_svc.listar_jogadores(pelada_id, per_page=200).get("data", [])
+            # Lista todos os jogadores da pelada
+            todos_jogadores = jogador_svc.listar_jogadores(pelada_id, per_page=200).get("data", [])
+            
+            # Coleta IDs dos jogadores que já estão em algum time da temporada (incluindo o próprio time)
+            jogadores_em_times = set()
+            try:
+                times_data = svc.listar_times_pelada(temporada_id, per_page=200)
+                times_list = times_data.get("data", [])
+                
+                for t in times_list:
+                    # Coleta IDs dos jogadores deste time (incluindo o time atual)
+                    # Pode vir em diferentes formatos: lista de dicts, lista de IDs, ou campo time_jogador
+                    jogadores_time = []
+                    if t.get("jogadores"):
+                        jogadores_time = t["jogadores"]
+                    elif t.get("time_jogadores"):
+                        jogadores_time = t["time_jogadores"]
+                    
+                    for j in jogadores_time:
+                        jogador_id = None
+                        if isinstance(j, dict):
+                            # Se for dict, pode ter id direto ou aninhado
+                            jogador_id = j.get("id") or j.get("jogador_id") or (j.get("jogador", {}).get("id") if isinstance(j.get("jogador"), dict) else None)
+                        elif isinstance(j, (int, str)):
+                            # Se for direto um ID
+                            try:
+                                jogador_id = int(j)
+                            except (ValueError, TypeError):
+                                pass
+                        
+                        if jogador_id:
+                            jogadores_em_times.add(int(jogador_id))
+            except Exception as e:
+                print(f"[WARN] Erro ao buscar jogadores em times: {e}")
+            
+            # Filtra jogadores disponíveis (exclui os que já estão em outros times)
+            jogadores_disponiveis = [
+                j for j in todos_jogadores 
+                if j.get("id") and int(j.get("id")) not in jogadores_em_times
+            ]
 
     return render_template("times/detalhe.html", time=time, jogadores_disponiveis=jogadores_disponiveis, temporada_id=temporada_id)

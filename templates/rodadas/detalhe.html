@@ -28,6 +28,147 @@
   </div>
 </div>
 
+<!-- Times da rodada (Ranking no topo) -->
+{% if rodada.times and rodada.times|length > 0 %}
+  {% call card("Times da Rodada", rodada.times|length ~ " times cadastrados", "shirt", "yellow") %}
+    <div class="space-y-2">
+      {% for t in rodada.times %}
+        <a href="/times/{{t.id}}" class="block rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl p-3.5 hover-border transition-all group">
+          <div class="flex items-center justify-between">
+            <div class="flex-1">
+              <div class="text-sm font-semibold text-slate-900">{{ t.nome }}</div>
+              <div class="text-xs text-slate-500 mt-1">
+                {% if t.pontos is defined or t.saldo_gols is defined %}
+                  Pontos: {{ t.pontos or 0 }} • Saldo de gols: {{ t.saldo_gols or 0 }}
+                {% else %}
+                  Time participante
+                {% endif %}
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% endcall %}
+{% endif %}
+
+<!-- Partidas -->
+{% call card("Partidas", (partidas|length if partidas else 0) ~ " partidas", "swords", "purple") %}
+<div class="space-y-2 mb-4">
+  {% if partidas and partidas|length > 0 %}
+    {% for p in partidas %}
+    <a href="/partidas/{{p.id}}" class="block rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border p-3 transition-all group">
+      <div class="flex items-center justify-between gap-3">
+        <div class="min-w-0 flex-1">
+          {% set casa = p.time_casa_full or p.time_casa or {} %}
+          {% set fora = p.time_fora_full or p.time_fora or {} %}
+          <!-- Confronto (no topo) - escudo em cima do nome + placar no meio -->
+          <div class="grid grid-cols-3 items-center gap-2">
+            <!-- Time 1 -->
+            <div class="min-w-0 flex flex-col items-center text-center gap-1">
+              <div class="w-10 h-10 rounded-xl bg-white/80 border border-slate-300/60 overflow-hidden grid place-items-center">
+                {% if casa.escudo_url %}
+                  <img src="/media/{{ casa.escudo_url[1:] if casa.escudo_url.startswith('/') else casa.escudo_url }}" alt="{{ casa.nome }}" class="w-full h-full object-cover" />
+                {% else %}
+                  <i data-lucide="shirt" class="w-5 h-5 text-slate-500"></i>
+                {% endif %}
+              </div>
+              <div class="text-sm font-semibold text-slate-900 leading-tight break-words w-full">
+                {{ casa.nome or "—" }}
+              </div>
+            </div>
+
+            <!-- Placar -->
+            <div class="flex flex-col items-center justify-center gap-1">
+              <div class="px-3 py-1.5 rounded-xl bg-slate-900 text-white font-semibold tabular-nums text-base">
+                {{ p.gols_casa or 0 }} : {{ p.gols_fora or 0 }}
+              </div>
+              <div class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Placar</div>
+            </div>
+
+            <!-- Time 2 -->
+            <div class="min-w-0 flex flex-col items-center text-center gap-1">
+              <div class="w-10 h-10 rounded-xl bg-white/80 border border-slate-300/60 overflow-hidden grid place-items-center">
+                {% if fora.escudo_url %}
+                  <img src="/media/{{ fora.escudo_url[1:] if fora.escudo_url.startswith('/') else fora.escudo_url }}" alt="{{ fora.nome }}" class="w-full h-full object-cover" />
+                {% else %}
+                  <i data-lucide="shirt" class="w-5 h-5 text-slate-500"></i>
+                {% endif %}
+              </div>
+              <div class="text-sm font-semibold text-slate-900 leading-tight break-words w-full">
+                {{ fora.nome or "—" }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-1.5 flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium {% if p.status == 'em_andamento' %}bg-emerald-50/80 text-emerald-700{% elif p.status == 'finalizada' %}bg-slate-100/80 text-slate-700{% else %}bg-blue-50/80 text-blue-700{% endif %}">
+              <span class="w-1.5 h-1.5 rounded-full {% if p.status == 'em_andamento' %}bg-emerald-500{% elif p.status == 'finalizada' %}bg-slate-400{% else %}bg-blue-500{% endif %}"></span>
+              {{ p.status }}
+            </span>
+          </div>
+        </div>
+        <div class="flex items-center gap-3 flex-shrink-0">
+          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  {% else %}
+    <div class="text-center py-8">
+      <div class="mb-3 inline-flex items-center justify-center w-11 h-11 rounded-md bg-purple-50/80 text-purple-400">
+        <i data-lucide="swords" class="w-5 h-5"></i>
+      </div>
+      <div class="text-sm text-slate-800 font-medium">Nenhuma partida cadastrada</div>
+      <div class="text-xs text-slate-500 mt-1">Crie sua primeira partida.</div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Botão para criar partida -->
+{% if times_disponiveis and times_disponiveis|length >= 2 %}
+<button id="btnCriarPartida" onclick="toggleFormPartida()" class="w-full h-11 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
+  <i data-lucide="plus" class="w-4 h-4"></i>
+  Criar Partida
+</button>
+
+<!-- Formulário (inicialmente oculto) -->
+<div id="formCriarPartida" class="hidden mt-3 p-4 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60">
+  <form method="post" class="space-y-3">
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1.5">Time 1</label>
+        <select name="time_casa_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
+          <option value="">Selecione</option>
+          {% for t in times_disponiveis %}
+          <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-medium text-slate-700 mb-1.5">Time 2</label>
+        <select name="time_fora_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
+          <option value="">Selecione</option>
+          {% for t in times_disponiveis %}
+          <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button type="submit" class="flex-1 h-10 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
+        <i data-lucide="check" class="w-4 h-4"></i>
+        Criar
+      </button>
+      <button type="button" onclick="toggleFormPartida()" class="h-10 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
+        Cancelar
+      </button>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endcall %}
+
 <!-- Fluxo de trabalho -->
 <div class="mb-6 p-4 rounded-lg bg-white/40 backdrop-blur-xl border border-slate-300/60">
   <div class="flex items-center gap-2 mb-3">
@@ -71,115 +212,6 @@
     </div>
   </a>
 </div>
-
-<!-- Partidas -->
-{% call card("Partidas", (partidas|length if partidas else 0) ~ " partidas", "swords", "purple") %}
-<div class="space-y-2 mb-4">
-  {% if partidas and partidas|length > 0 %}
-    {% for p in partidas %}
-    <a href="/partidas/{{p.id}}" class="block rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover-border p-3 transition-all group">
-      <div class="flex items-center justify-between gap-3">
-        <div class="min-w-0 flex-1">
-          <div class="text-sm font-medium text-slate-900 truncate">
-            {% if p.time_casa %}{{ p.time_casa.nome }}{% else %}Time Casa{% endif %}
-            <span class="text-slate-300 mx-2">×</span>
-            {% if p.time_fora %}{{ p.time_fora.nome }}{% else %}Time Fora{% endif %}
-          </div>
-          <div class="mt-1.5 flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium {% if p.status == 'em_andamento' %}bg-emerald-50/80 text-emerald-700{% elif p.status == 'finalizada' %}bg-slate-100/80 text-slate-700{% else %}bg-blue-50/80 text-blue-700{% endif %}">
-              <span class="w-1.5 h-1.5 rounded-full {% if p.status == 'em_andamento' %}bg-emerald-500{% elif p.status == 'finalizada' %}bg-slate-400{% else %}bg-blue-500{% endif %}"></span>
-              {{ p.status }}
-            </span>
-          </div>
-        </div>
-        <div class="flex items-center gap-3 flex-shrink-0">
-          <div class="px-3 py-1.5 rounded-md bg-white/60 text-base font-medium text-slate-900">
-            {{ p.gols_casa or 0 }} : {{ p.gols_fora or 0 }}
-          </div>
-          <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-        </div>
-      </div>
-    </a>
-    {% endfor %}
-  {% else %}
-    <div class="text-center py-8">
-      <div class="mb-3 inline-flex items-center justify-center w-11 h-11 rounded-md bg-purple-50/80 text-purple-400">
-        <i data-lucide="swords" class="w-5 h-5"></i>
-      </div>
-      <div class="text-sm text-slate-800 font-medium">Nenhuma partida cadastrada</div>
-      <div class="text-xs text-slate-500 mt-1">Crie sua primeira partida.</div>
-    </div>
-  {% endif %}
-</div>
-
-<!-- Botão para criar partida -->
-{% if times_disponiveis and times_disponiveis|length >= 2 %}
-<button id="btnCriarPartida" onclick="toggleFormPartida()" class="w-full h-11 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60 hover:bg-white/60 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center gap-2">
-  <i data-lucide="plus" class="w-4 h-4"></i>
-  Criar Partida
-</button>
-
-<!-- Formulário (inicialmente oculto) -->
-<div id="formCriarPartida" class="hidden mt-3 p-4 rounded-md bg-white/40 backdrop-blur-xl border border-slate-300/60">
-  <form method="post" class="space-y-3">
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-xs font-medium text-slate-700 mb-1.5">Time da casa</label>
-        <select name="time_casa_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
-          <option value="">Selecione</option>
-          {% for t in times_disponiveis %}
-          <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-      <div>
-        <label class="block text-xs font-medium text-slate-700 mb-1.5">Time visitante</label>
-        <select name="time_fora_id" required class="w-full text-sm px-4 py-2.5 rounded-md bg-white/60 backdrop-blur-xl border border-slate-300/60 hover-border text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500/40">
-          <option value="">Selecione</option>
-          {% for t in times_disponiveis %}
-          <option value="{{t.id}}">{{ t.nome }}{% if t.cor %} ({{ t.cor }}){% endif %}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    <div class="flex gap-2">
-      <button type="submit" class="flex-1 h-10 rounded-md bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
-        <i data-lucide="check" class="w-4 h-4"></i>
-        Criar
-      </button>
-      <button type="button" onclick="toggleFormPartida()" class="h-10 px-4 rounded-md bg-white/60 backdrop-blur-xl hover:bg-white/80 text-sm font-medium text-slate-700 transition-all inline-flex items-center justify-center">
-        Cancelar
-      </button>
-    </div>
-  </form>
-</div>
-{% endif %}
-{% endcall %}
-
-<!-- Times da rodada (só mostra se houver times) -->
-{% if rodada.times and rodada.times|length > 0 %}
-  {% call card("Times da Rodada", rodada.times|length ~ " times cadastrados", "shirt", "yellow") %}
-    <div class="space-y-2">
-      {% for t in rodada.times %}
-        <a href="/times/{{t.id}}" class="block rounded-lg border border-slate-300/60 bg-white/40 backdrop-blur-xl p-3.5 hover-border transition-all group">
-          <div class="flex items-center justify-between">
-            <div class="flex-1">
-              <div class="text-sm font-semibold text-slate-900">{{ t.nome }}</div>
-              <div class="text-xs text-slate-500 mt-1">
-                {% if t.pontos is defined or t.saldo_gols is defined %}
-                  Pontos: {{ t.pontos or 0 }} • Saldo de gols: {{ t.saldo_gols or 0 }}
-                {% else %}
-                  Time participante
-                {% endif %}
-              </div>
-            </div>
-            <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-          </div>
-        </a>
-      {% endfor %}
-    </div>
-  {% endcall %}
-{% endif %}
 
 <script>
 function toggleFormPartida() {
