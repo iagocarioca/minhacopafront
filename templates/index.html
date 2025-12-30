@@ -1,0 +1,914 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Landing – Tema Esmeralda (CDN Tailwind)</title>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Config (tema esmeralda claro + radius <= 6px) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emeraldBrand: {
+                            50: "#ecfdf5",
+                            100: "#d1fae5",
+                            200: "#a7f3d0",
+                            300: "#6ee7b7",
+                            400: "#34d399",
+                            500: "#10b981",
+                            600: "#059669",
+                            700: "#047857",
+                            800: "#065f46",
+                            900: "#064e3b",
+                        }
+                    },
+                    boxShadow: {
+                        glow: "0 18px 45px rgba(16,185,129,.18)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .noise {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.18'/%3E%3C/svg%3E");
+            background-size: 180px 180px;
+            mix-blend-mode: soft-light;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="bg-white text-slate-900">
+
+    <!-- Background gradients -->
+    <div class="relative isolate overflow-hidden">
+        <div class="absolute inset-0 -z-10">
+            <div
+                class="absolute -top-28 left-1/2 h-[560px] w-[560px] -translate-x-1/2 rounded-full bg-emeraldBrand-400/20 blur-3xl">
+            </div>
+            <div class="absolute -top-44 -left-36 h-[560px] w-[560px] rounded-full bg-emeraldBrand-500/15 blur-3xl">
+            </div>
+            <div class="absolute top-28 -right-32 h-[560px] w-[560px] rounded-full bg-emerald-300/20 blur-3xl"></div>
+            <div class="noise absolute inset-0 opacity-70"></div>
+        </div>
+
+        <!-- NAV -->
+        <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/70 border-b border-slate-200">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between py-4">
+                    <a href="/" class="flex items-center gap-3">
+                        <img src="{{ url_for('static', filename='imgs/logo.png') }}" alt="Logo"
+                            class="w-40 object-contain flex-shrink-0 max-w-full" />
+                    </a>
+
+                    <nav class="hidden md:flex items-center gap-6 text-sm font-medium text-slate-700">
+                        <a href="#features" class="hover:text-emeraldBrand-700">Recursos</a>
+                        <a href="#how" class="hover:text-emeraldBrand-700">Como funciona</a>
+                        <a href="#testimonials" class="hover:text-emeraldBrand-700">Depoimentos</a>
+                        <a href="#faq" class="hover:text-emeraldBrand-700">FAQ</a>
+                    </nav>
+
+                    <div class="flex items-center gap-3">
+                        <!-- Botão desktop - visível apenas em md e acima -->
+                        <a href="/register"
+                            class="hidden md:inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-white bg-emeraldBrand-600 hover:bg-emeraldBrand-700 shadow-glow">
+                            Criar campeonato
+                        </a>
+
+                        <button id="menuBtn"
+                            class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-md border border-slate-200 hover:bg-white"
+                            aria-label="Abrir menu">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M4 7h16M4 12h16M4 17h16" stroke="#0f172a" stroke-width="1.8"
+                                    stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile menu -->
+                <div id="mobileMenu" class="md:hidden hidden pb-4">
+                    <div class="grid gap-2 text-sm font-medium text-slate-700">
+                        <a class="rounded-md px-3 py-2 hover:bg-white" href="#features">Recursos</a>
+                        <a class="rounded-md px-3 py-2 hover:bg-white" href="#how">Como funciona</a>
+                        <a class="rounded-md px-3 py-2 hover:bg-white" href="#testimonials">Depoimentos</a>
+                        <a class="rounded-md px-3 py-2 hover:bg-white" href="#faq">FAQ</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Botão mobile - visível apenas abaixo do header no mobile -->
+        <div class="md:hidden sticky top-[73px] z-40 border-b border-slate-200/50 bg-white/80 backdrop-blur-md">
+            <div class="px-4 py-3">
+                <a href="/register"
+                    class="block w-full py-3 px-4 text-center rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-emeraldBrand-600 to-emeraldBrand-700 hover:from-emeraldBrand-700 hover:to-emeraldBrand-800 shadow-md shadow-emeraldBrand-500/20 transition-all duration-200 active:scale-[0.98]">
+                    Criar campeonato grátis
+                </a>
+            </div>
+        </div>
+
+        <!-- HERO -->
+        <section class="relative">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-14 pb-16 md:pt-14">
+                <div class="grid lg:grid-cols-12 gap-10 items-center">
+
+                    <div class="lg:col-span-6">
+                        <div
+                            class="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white/70 px-3 py-1 text-xs font-medium text-slate-700">
+                            <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                            Automação: tabela, súmula, ranking e votação
+                            <span
+                                class="ml-1 rounded-md bg-emeraldBrand-50 text-emeraldBrand-800 px-2 py-0.5 font-medium">NOVO</span>
+                        </div>
+
+                        <h1 class="mt-4 text-4xl sm:text-5xl font-semibold tracking-tight">
+                            O jeito mais fácil de gerenciar seu <span class="text-emeraldBrand-700">campeonato</span>
+                        </h1>
+
+                        <p class="mt-4 text-lg text-slate-600 leading-relaxed">
+                            Organize jogos, resultados, classificação e estatísticas em um painel moderno e rápido — com
+                            foco total no mobile.
+                        </p>
+
+                        <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                            <a href="/register"
+                                class="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold text-white bg-emeraldBrand-600 hover:bg-emeraldBrand-700 shadow-glow">
+                                Começar grátis
+                            </a>
+                            <a href="#how"
+                                class="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-medium border border-slate-200 bg-white/70 hover:bg-white">
+                                Ver como funciona
+                            </a>
+                        </div>
+
+                        <div class="mt-8 grid sm:grid-cols-3 gap-3">
+                            <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                                <div class="text-2xl font-semibold">+1.2k</div>
+                                <div class="text-sm text-slate-600">competições criadas</div>
+                            </div>
+                            <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                                <div class="text-2xl font-semibold">99.9%</div>
+                                <div class="text-sm text-slate-600">uptime</div>
+                            </div>
+                            <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                                <div class="text-2xl font-semibold">Mobile</div>
+                                <div class="text-sm text-slate-600">primeiro</div>
+                            </div>
+                        </div>
+
+                        <!-- Pessoas reais (exemplos) -->
+                        <div class="mt-8 flex items-center gap-4">
+                            <div class="flex -space-x-2">
+                                <img class="h-10 w-10 rounded-md border border-white object-cover"
+                                    src="https://source.unsplash.com/80x80/?person,portrait,man&sig=11" alt="Pessoa 1">
+                                <img class="h-10 w-10 rounded-md border border-white object-cover"
+                                    src="https://source.unsplash.com/80x80/?person,portrait,woman&sig=12"
+                                    alt="Pessoa 2">
+                                <img class="h-10 w-10 rounded-md border border-white object-cover"
+                                    src="https://source.unsplash.com/80x80/?person,portrait&sig=13" alt="Pessoa 3">
+                                <img class="h-10 w-10 rounded-md border border-white object-cover"
+                                    src="https://source.unsplash.com/80x80/?person,portrait,smile&sig=14"
+                                    alt="Pessoa 4">
+                            </div>
+                            <div class="text-sm text-slate-600">
+                                <span class="font-semibold text-slate-900">+300 organizadores</span> usando diariamente
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preview / Dashboard -->
+                    <div class="lg:col-span-6">
+                        <div class="relative rounded-md border border-slate-200 bg-white/70 shadow-xl overflow-hidden">
+                            <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-rose-400"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-amber-400"></span>
+                                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-400"></span>
+                                </div>
+                                <div class="text-xs font-medium text-slate-600">Painel do Organizador</div>
+                                <div class="text-xs text-slate-500">v1</div>
+                            </div>
+
+                            <div class="p-6">
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <!-- Partida -->
+                                    <div class="rounded-md border border-slate-200 bg-white p-4">
+                                        <div class="flex items-start justify-between">
+                                            <div>
+                                                <div class="text-xs font-medium text-slate-500">Partida Atual</div>
+                                                <div class="mt-1 font-semibold">Time A vs Time B</div>
+                                                <div class="mt-1 text-sm text-slate-600">Rodada 3 • 20:30</div>
+                                            </div>
+                                            <span
+                                                class="rounded-md bg-emeraldBrand-50 text-emeraldBrand-800 text-xs font-medium px-2 py-1">Ao
+                                                vivo</span>
+                                        </div>
+
+                                        <div class="mt-4 grid grid-cols-3 items-center text-center">
+                                            <div class="rounded-md bg-slate-50 p-3">
+                                                <div class="text-xs text-slate-500">A</div>
+                                                <div class="text-2xl font-semibold">2</div>
+                                            </div>
+                                            <div class="text-sm text-slate-500 font-medium">x</div>
+                                            <div class="rounded-md bg-slate-50 p-3">
+                                                <div class="text-xs text-slate-500">B</div>
+                                                <div class="text-2xl font-semibold">1</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 flex gap-2">
+                                            <button
+                                                class="flex-1 rounded-md bg-emeraldBrand-600 text-white text-sm font-semibold py-2 hover:bg-emeraldBrand-700">+
+                                                Gol A</button>
+                                            <button
+                                                class="flex-1 rounded-md bg-slate-900 text-white text-sm font-semibold py-2 hover:bg-slate-800">+
+                                                Gol B</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Classificação -->
+                                    <div class="rounded-md border border-slate-200 bg-white p-4">
+                                        <div class="text-xs font-medium text-slate-500">Classificação</div>
+                                        <div class="mt-3 space-y-2">
+                                            <div
+                                                class="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="text-xs font-semibold text-slate-500">1</span>
+                                                    <span class="font-medium">Time A</span>
+                                                </div>
+                                                <div class="text-sm font-semibold">9 pts</div>
+                                            </div>
+                                            <div
+                                                class="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="text-xs font-semibold text-slate-500">2</span>
+                                                    <span class="font-medium">Time D</span>
+                                                </div>
+                                                <div class="text-sm font-semibold">7 pts</div>
+                                            </div>
+                                            <div
+                                                class="flex items-center justify-between rounded-md bg-slate-50 px-3 py-2">
+                                                <div class="flex items-center gap-3">
+                                                    <span class="text-xs font-semibold text-slate-500">3</span>
+                                                    <span class="font-medium">Time B</span>
+                                                </div>
+                                                <div class="text-sm font-semibold">6 pts</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mt-4 grid grid-cols-3 gap-2">
+                                            <div class="rounded-md border border-slate-200 p-2 text-center">
+                                                <div class="text-xs text-slate-500">Jogos</div>
+                                                <div class="font-semibold">12</div>
+                                            </div>
+                                            <div class="rounded-md border border-slate-200 p-2 text-center">
+                                                <div class="text-xs text-slate-500">Gols</div>
+                                                <div class="font-semibold">38</div>
+                                            </div>
+                                            <div class="rounded-md border border-slate-200 p-2 text-center">
+                                                <div class="text-xs text-slate-500">Cartões</div>
+                                                <div class="font-semibold">9</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Votação -->
+                                    <div class="md:col-span-2 rounded-md border border-slate-200 bg-white p-4">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <div class="text-xs font-medium text-slate-500">Votação – Melhor Jogador
+                                                </div>
+                                                <div class="mt-1 font-semibold">Noite de Quinta • Rodada 3</div>
+                                            </div>
+                                            <span
+                                                class="rounded-md bg-amber-50 text-amber-700 text-xs font-medium px-2 py-1">Após
+                                                o jogo</span>
+                                        </div>
+
+                                        <div class="mt-4 grid sm:grid-cols-3 gap-3">
+                                            <button
+                                                class="rounded-md border border-slate-200 bg-slate-50 hover:bg-white p-3 text-left">
+                                                <div class="flex items-center gap-3">
+                                                    <img class="h-10 w-10 rounded-md object-cover"
+                                                        src="https://source.unsplash.com/80x80/?athlete,portrait&sig=21"
+                                                        alt="Atleta 1">
+                                                    <div>
+                                                        <div class="font-medium">Carlos</div>
+                                                        <div class="text-xs text-slate-500">Time A • Atacante</div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 h-2 rounded bg-slate-200 overflow-hidden">
+                                                    <div class="h-full w-[58%] bg-emeraldBrand-600"></div>
+                                                </div>
+                                                <div class="mt-2 text-xs text-slate-600">58% dos votos</div>
+                                            </button>
+
+                                            <button
+                                                class="rounded-md border border-slate-200 bg-slate-50 hover:bg-white p-3 text-left">
+                                                <div class="flex items-center gap-3">
+                                                    <img class="h-10 w-10 rounded-md object-cover"
+                                                        src="https://source.unsplash.com/80x80/?woman,portrait,athlete&sig=22"
+                                                        alt="Atleta 2">
+                                                    <div>
+                                                        <div class="font-medium">Lucas</div>
+                                                        <div class="text-xs text-slate-500">Time D • Meia</div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 h-2 rounded bg-slate-200 overflow-hidden">
+                                                    <div class="h-full w-[31%] bg-slate-900"></div>
+                                                </div>
+                                                <div class="mt-2 text-xs text-slate-600">31% dos votos</div>
+                                            </button>
+
+                                            <button
+                                                class="rounded-md border border-slate-200 bg-slate-50 hover:bg-white p-3 text-left">
+                                                <div class="flex items-center gap-3">
+                                                    <img class="h-10 w-10 rounded-md object-cover"
+                                                        src="https://source.unsplash.com/80x80/?goalkeeper,portrait&sig=23"
+                                                        alt="Atleta 3">
+                                                    <div>
+                                                        <div class="font-medium">Renan</div>
+                                                        <div class="text-xs text-slate-500">Time B • Goleiro</div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3 h-2 rounded bg-slate-200 overflow-hidden">
+                                                    <div class="h-full w-[11%] bg-emeraldBrand-600"></div>
+                                                </div>
+                                                <div class="mt-2 text-xs text-slate-600">11% dos votos</div>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div
+                                class="absolute -right-20 -bottom-20 h-72 w-72 rounded-full bg-emeraldBrand-500/15 blur-3xl">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ICON LIST (informações “de antes”) -->
+    <section class="py-14 bg-slate-50 border-y border-slate-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
+                <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                    <div class="text-sm font-semibold">Gerador</div>
+                    <div class="text-xs text-slate-500">Confrontos</div>
+                </div>
+                <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                    <div class="text-sm font-semibold">Ranking</div>
+                    <div class="text-xs text-slate-500">Automático</div>
+                </div>
+                <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                    <div class="text-sm font-semibold">Fotos</div>
+                    <div class="text-xs text-slate-500">Mídia</div>
+                </div>
+                <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                    <div class="text-sm font-semibold">Súmula</div>
+                    <div class="text-xs text-slate-500">Partidas</div>
+                </div>
+                <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                    <div class="text-sm font-semibold">Stats</div>
+                    <div class="text-xs text-slate-500">Gols/Cartões</div>
+                </div>
+                <div class="rounded-md border border-slate-200 bg-white/70 p-4">
+                    <div class="text-sm font-semibold">Inscrições</div>
+                    <div class="text-xs text-slate-500">Jogadores</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="py-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <div
+                    class="inline-flex items-center gap-2 rounded-md bg-emeraldBrand-50 text-emeraldBrand-800 px-3 py-1 text-xs font-medium">
+                    Recursos
+                </div>
+                <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">Tudo para organizar</h2>
+                <p class="mt-3 text-slate-600">Cadastro, partidas, ranking e MVP — sem planilha.</p>
+            </div>
+
+            <div class="mt-12 grid lg:grid-cols-3 gap-6">
+                <div
+                    class="group rounded-md border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white p-6 hover:shadow-xl transition relative overflow-hidden">
+                    <div class="absolute top-2 right-2">
+                        <span
+                            class="inline-flex items-center gap-1 rounded-md bg-purple-600 text-white text-[10px] font-semibold px-2 py-0.5">
+                            ✨ IA
+                        </span>
+                    </div>
+                    <div
+                        class="h-12 w-12 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 text-white grid place-items-center">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-xl font-semibold">Imagens automáticas com IA</h3>
+                    <p class="mt-2 text-slate-600">Gere imagens profissionais dos jogadores da semana automaticamente
+                        após cada rodada. Estilo neon e moderno, perfeito para compartilhar.</p>
+                    <div class="mt-4 flex items-center gap-2 text-sm font-medium text-purple-700">
+                        Ver exemplo
+                        <svg class="transition group-hover:translate-x-1" width="18" height="18" viewBox="0 0 24 24"
+                            fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="group rounded-md border border-slate-200 bg-white p-6 hover:shadow-xl transition">
+                    <div class="h-12 w-12 rounded-md bg-emeraldBrand-50 text-emeraldBrand-800 grid place-items-center">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M4 7h16M4 12h10M4 17h16" stroke="currentColor" stroke-width="1.8"
+                                stroke-linecap="round" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-xl font-semibold">Súmula & placar ao vivo</h3>
+                    <p class="mt-2 text-slate-600">Lance gols e cartões em tempo real e atualize a tabela
+                        automaticamente.</p>
+                    <div class="mt-4 flex items-center gap-2 text-sm font-medium text-emeraldBrand-700">
+                        Ver detalhes
+                        <svg class="transition group-hover:translate-x-1" width="18" height="18" viewBox="0 0 24 24"
+                            fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+
+                <div class="group rounded-md border border-slate-200 bg-white p-6 hover:shadow-xl transition">
+                    <div class="h-12 w-12 rounded-md bg-emeraldBrand-50 text-emeraldBrand-800 grid place-items-center">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M7 12l3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.2" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-xl font-semibold">Tabelas automáticas</h3>
+                    <p class="mt-2 text-slate-600">Critérios configuráveis: pontos, saldo, confronto direto e mais.</p>
+                    <div class="mt-4 flex items-center gap-2 text-sm font-medium text-emeraldBrand-700">
+                        Configurar
+                        <svg class="transition group-hover:translate-x-1" width="18" height="18" viewBox="0 0 24 24"
+                            fill="none">
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW -->
+    <section id="how" class="py-20 bg-slate-50 border-y border-slate-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-12 gap-10 items-start">
+                <div class="lg:col-span-5">
+                    <div
+                        class="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
+                        Como funciona
+                    </div>
+                    <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">Do zero ao jogo rolando</h2>
+                    <p class="mt-3 text-slate-600">Fluxo simples, porém poderoso.</p>
+
+                    <div class="mt-6 space-y-3">
+                        <div class="rounded-md border border-slate-200 bg-white p-4">
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="h-10 w-10 rounded-md bg-emeraldBrand-600 text-white grid place-items-center font-semibold">
+                                    1</div>
+                                <div>
+                                    <div class="font-semibold">Crie a competição</div>
+                                    <div class="text-sm text-slate-600">Times, jogadores, regras e formato.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-md border border-slate-200 bg-white p-4">
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="h-10 w-10 rounded-md bg-slate-900 text-white grid place-items-center font-semibold">
+                                    2</div>
+                                <div>
+                                    <div class="font-semibold">Gere confrontos</div>
+                                    <div class="text-sm text-slate-600">Tabela automática por rodadas.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-md border border-slate-200 bg-white p-4">
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="h-10 w-10 rounded-md bg-emeraldBrand-600 text-white grid place-items-center font-semibold">
+                                    3</div>
+                                <div>
+                                    <div class="font-semibold">Registre resultados</div>
+                                    <div class="text-sm text-slate-600">Súmula e estatísticas atualizam o ranking.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-md border border-slate-200 bg-white p-4">
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="h-10 w-10 rounded-md bg-emerald-500 text-white grid place-items-center font-semibold">
+                                    4</div>
+                                <div>
+                                    <div class="font-semibold">Votação pós-jogo</div>
+                                    <div class="text-sm text-slate-600">MVP por evento/rodada + histórico.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-7">
+                    <div class="rounded-md border border-slate-200 bg-white shadow-xl overflow-hidden">
+                        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
+                            <div class="text-sm font-semibold">Timeline do Evento</div>
+                            <div class="text-xs text-slate-500">Exemplo • Pelada Mensal</div>
+                        </div>
+
+                        <div class="p-6">
+                            <div class="grid gap-4">
+                                <div class="rounded-md border border-slate-200 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="font-semibold">Cadastro & times</div>
+                                        <span class="text-xs text-slate-500">Dia 01</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 mt-2">Importe jogadores, defina posições e nível.
+                                    </p>
+                                </div>
+
+                                <div class="rounded-md border border-slate-200 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="font-semibold">Rodadas</div>
+                                        <span class="text-xs text-slate-500">Semanas 1–4</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 mt-2">Tabela automática, com edição rápida se
+                                        precisar.</p>
+                                </div>
+
+                                <div class="rounded-md border border-slate-200 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="font-semibold">Votação MVP</div>
+                                        <span class="text-xs text-slate-500">Após jogos</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 mt-2">Vote e gere ranking histórico por temporada.
+                                    </p>
+                                </div>
+
+                                <div class="rounded-md border border-slate-200 p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="font-semibold">Fechamento</div>
+                                        <span class="text-xs text-slate-500">Fim</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 mt-2">Exportações e relatório final para
+                                        compartilhar.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 grid sm:grid-cols-3 gap-4">
+                        <div class="rounded-md border border-slate-200 bg-white p-4">
+                            <div class="text-xs text-slate-500 font-medium">Tempo médio</div>
+                            <div class="mt-1 text-2xl font-semibold">6 min</div>
+                            <div class="text-sm text-slate-600">para montar</div>
+                        </div>
+                        <div class="rounded-md border border-slate-200 bg-white p-4">
+                            <div class="text-xs text-slate-500 font-medium">Automação</div>
+                            <div class="mt-1 text-2xl font-semibold">Alta</div>
+                            <div class="text-sm text-slate-600">tabelas/ranking</div>
+                        </div>
+                        <div class="rounded-md border border-slate-200 bg-white p-4">
+                            <div class="text-xs text-slate-500 font-medium">Compartilhar</div>
+                            <div class="mt-1 text-2xl font-semibold">Link</div>
+                            <div class="text-sm text-slate-600">público</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- IA - Geração de Imagens -->
+    <section id="ia-images" class="py-20 bg-gradient-to-br from-emeraldBrand-50 to-slate-50 border-y border-slate-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <div
+                    class="inline-flex items-center gap-2 rounded-md bg-emeraldBrand-600 text-white px-3 py-1 text-xs font-medium">
+                    ✨ NOVO
+                </div>
+                <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">Imagens automáticas dos jogadores da
+                    semana com IA</h2>
+                <p class="mt-3 text-slate-600">Gere imagens incríveis dos destaques automaticamente após cada rodada.
+                </p>
+            </div>
+
+            <div class="mt-12 grid lg:grid-cols-2 gap-8 items-center">
+                <div class="space-y-6">
+                    <div class="rounded-md border border-slate-200 bg-white p-6 shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="h-12 w-12 rounded-md bg-gradient-to-br from-purple-500 to-pink-500 text-white grid place-items-center flex-shrink-0">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold">Geração automática</h3>
+                                <p class="mt-2 text-slate-600">Após cada rodada, nossa IA identifica automaticamente os
+                                    jogadores em destaque (MVP, artilheiro, melhor goleiro) e gera imagens profissionais
+                                    com estilo neon e moderno.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-md border border-slate-200 bg-white p-6 shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="h-12 w-12 rounded-md bg-gradient-to-br from-blue-500 to-cyan-500 text-white grid place-items-center flex-shrink-0">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold">Estilo profissional</h3>
+                                <p class="mt-2 text-slate-600">Imagens com efeitos neon, cores vibrantes e design
+                                    moderno, perfeitas para compartilhar nas redes sociais e destacar os melhores
+                                    jogadores da semana.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="rounded-md border border-slate-200 bg-white p-6 shadow-lg">
+                        <div class="flex items-start gap-4">
+                            <div
+                                class="h-12 w-12 rounded-md bg-gradient-to-br from-emeraldBrand-500 to-teal-500 text-white grid place-items-center flex-shrink-0">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                    <path
+                                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold">Compartilhamento fácil</h3>
+                                <p class="mt-2 text-slate-600">Baixe e compartilhe as imagens geradas diretamente no
+                                    WhatsApp, Instagram ou qualquer rede social. Tudo automático, sem trabalho manual.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="rounded-md border border-slate-200 bg-white shadow-xl overflow-hidden">
+                        <div
+                            class="p-5 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-purple-500 to-pink-500">
+                            <div class="text-white font-semibold">Jogador da Semana</div>
+                            <div class="text-white/80 text-xs">IA Gerado</div>
+                        </div>
+                        <div class="p-6 bg-gradient-to-br from-slate-900 to-slate-800">
+                            <div class="text-center">
+                                <div class="inline-block rounded-full border-4 border-emeraldBrand-400 p-2 mb-4">
+                                    <img class="h-24 w-24 rounded-full object-cover"
+                                        src="https://source.unsplash.com/200x200/?athlete,portrait&sig=ai1"
+                                        alt="Jogador em destaque">
+                                </div>
+                                <div class="text-white font-semibold text-xl">Carlos Silva</div>
+                                <div class="text-emeraldBrand-400 text-sm mt-1">MVP da Rodada 3</div>
+                                <div
+                                    class="mt-4 inline-flex items-center gap-2 rounded-md bg-emeraldBrand-600/20 border border-emeraldBrand-400/30 px-4 py-2">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        class="text-emeraldBrand-400">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    <span class="text-emeraldBrand-300 text-xs font-medium">Gerado por IA</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="absolute -right-4 -bottom-4 h-32 w-32 rounded-full bg-purple-500/20 blur-2xl"></div>
+                </div>
+            </div>
+
+            <div class="mt-12 text-center">
+                <a href="/register"
+                    class="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold text-white bg-emeraldBrand-600 hover:bg-emeraldBrand-700 shadow-glow">
+                    Começar grátis e gerar imagens com IA
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section id="testimonials" class="py-20 bg-slate-50 border-y border-slate-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <div
+                    class="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
+                    Depoimentos
+                </div>
+                <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">Pessoas reais (exemplos)</h2>
+                <p class="mt-3 text-slate-600">Imagens puxadas do Unsplash (gratuito).</p>
+            </div>
+
+            <div class="mt-12 grid lg:grid-cols-3 gap-6">
+                <figure class="rounded-md border border-slate-200 bg-white overflow-hidden">
+                    <img class="h-44 w-full object-cover"
+                        src="https://source.unsplash.com/900x500/?coach,soccer,portrait&sig=31" alt="Depoimento 1">
+                    <figcaption class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="font-semibold">João Ribeiro</div>
+                            <div class="text-xs text-slate-500">Liga Fut7</div>
+                        </div>
+                        <p class="mt-3 text-slate-700 leading-relaxed">“Tabela e súmula automatizadas. Economiza tempo.”
+                        </p>
+                        <div class="mt-3 text-amber-500 text-sm">★★★★★</div>
+                    </figcaption>
+                </figure>
+
+                <figure class="rounded-md border border-slate-200 bg-white overflow-hidden">
+                    <img class="h-44 w-full object-cover"
+                        src="https://source.unsplash.com/900x500/?woman,manager,sports&sig=32" alt="Depoimento 2">
+                    <figcaption class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="font-semibold">Tainá Souza</div>
+                            <div class="text-xs text-slate-500">Futsal</div>
+                        </div>
+                        <p class="mt-3 text-slate-700 leading-relaxed">“Muito bom no celular e o link público ajuda.”
+                        </p>
+                        <div class="mt-3 text-amber-500 text-sm">★★★★★</div>
+                    </figcaption>
+                </figure>
+
+                <figure class="rounded-md border border-slate-200 bg-white overflow-hidden">
+                    <img class="h-44 w-full object-cover"
+                        src="https://source.unsplash.com/900x500/?soccer,referee,portrait&sig=33" alt="Depoimento 3">
+                    <figcaption class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div class="font-semibold">Marcos Lima</div>
+                            <div class="text-xs text-slate-500">Pelada</div>
+                        </div>
+                        <p class="mt-3 text-slate-700 leading-relaxed">“O sorteio deixou os times mais equilibrados.”
+                        </p>
+                        <div class="mt-3 text-amber-500 text-sm">★★★★★</div>
+                    </figcaption>
+                </figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="cta" class="py-20">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div
+                class="relative overflow-hidden rounded-md border border-slate-200 bg-gradient-to-r from-emeraldBrand-600 to-slate-900 p-8 sm:p-12 shadow-glow">
+                <div class="absolute inset-0 opacity-20 noise"></div>
+
+                <div class="relative text-center">
+                    <h3 class="text-3xl sm:text-4xl font-semibold tracking-tight text-white">Crie seu campeonato agora
+                    </h3>
+                    <p class="mt-3 text-white/80 text-lg">Comece grátis e em minutos você já tem tabela, ranking e
+                        imagens automáticas dos destaques com IA.
+                    </p>
+                    <div class="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+                        <a href="/register"
+                            class="inline-flex items-center justify-center rounded-md bg-white text-slate-900 px-6 py-3 text-sm font-semibold hover:bg-white/90">
+                            Criar conta grátis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="py-20 bg-slate-50 border-t border-slate-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto">
+                <div
+                    class="inline-flex items-center gap-2 rounded-md bg-white border border-slate-200 px-3 py-1 text-xs font-medium text-slate-700">
+                    FAQ
+                </div>
+                <h2 class="mt-4 text-3xl sm:text-4xl font-semibold tracking-tight">Dúvidas comuns</h2>
+                <p class="mt-3 text-slate-600">Sem enrolação.</p>
+            </div>
+
+            <div class="mt-12 grid lg:grid-cols-2 gap-6">
+                <details class="group rounded-md border border-slate-200 bg-white p-6">
+                    <summary class="cursor-pointer list-none flex items-center justify-between">
+                        <span class="font-semibold">Funciona no celular?</span>
+                        <span
+                            class="ml-4 h-9 w-9 rounded-md border border-slate-200 grid place-items-center group-open:rotate-45 transition">
+                            <span class="text-xl leading-none">+</span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 text-slate-600">Sim, é mobile-first e rápido.</p>
+                </details>
+
+                <details class="group rounded-md border border-slate-200 bg-white p-6">
+                    <summary class="cursor-pointer list-none flex items-center justify-between">
+                        <span class="font-semibold">Tem votação do melhor jogador?</span>
+                        <span
+                            class="ml-4 h-9 w-9 rounded-md border border-slate-200 grid place-items-center group-open:rotate-45 transition">
+                            <span class="text-xl leading-none">+</span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 text-slate-600">Sim, por rodada/evento e com histórico por mês.</p>
+                </details>
+
+                <details class="group rounded-md border border-slate-200 bg-white p-6">
+                    <summary class="cursor-pointer list-none flex items-center justify-between">
+                        <span class="font-semibold">Dá pra configurar regras do ranking?</span>
+                        <span
+                            class="ml-4 h-9 w-9 rounded-md border border-slate-200 grid place-items-center group-open:rotate-45 transition">
+                            <span class="text-xl leading-none">+</span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 text-slate-600">Sim, pontos, saldo, confronto direto e mais.</p>
+                </details>
+
+                <details class="group rounded-md border border-slate-200 bg-white p-6">
+                    <summary class="cursor-pointer list-none flex items-center justify-between">
+                        <span class="font-semibold">Tem API?</span>
+                        <span
+                            class="ml-4 h-9 w-9 rounded-md border border-slate-200 grid place-items-center group-open:rotate-45 transition">
+                            <span class="text-xl leading-none">+</span>
+                        </span>
+                    </summary>
+                    <p class="mt-4 text-slate-600">Em planos avançados, sim: webhooks e endpoints.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-12 bg-white">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid sm:grid-cols-2 gap-6 items-center">
+                <div class="text-sm text-slate-600">
+                    © <span id="year"></span> SuaPlataforma
+                </div>
+                <div class="flex sm:justify-end gap-2 text-sm">
+                    <a class="rounded-md border border-slate-200 px-3 py-1 hover:bg-slate-50"
+                        href="/register">Começar</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JS mínimo -->
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+
+        const btn = document.getElementById("menuBtn");
+        const menu = document.getElementById("mobileMenu");
+        btn?.addEventListener("click", () => menu.classList.toggle("hidden"));
+
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+            a.addEventListener("click", (e) => {
+                const id = a.getAttribute("href");
+                if (!id || id === "#") return;
+                const el = document.querySelector(id);
+                if (!el) return;
+                e.preventDefault();
+                menu?.classList.add("hidden");
+                el.scrollIntoView({ behavior: "smooth", block: "start" });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

@@ -68,6 +68,53 @@ def list_create():
 
     page = int(request.args.get("page", "1"))
     data = svc.listar_peladas(page=page, per_page=10)
+    
+    # Filtrar peladas que o usuário realmente pode acessar
+    # Busca o ID do usuário logado para comparar com usuario_gerente_id
+    from services.auth_service import me
+    from services.api_client import ApiError
+    
+    usuario_id = None
+    try:
+        usuario_data = me()
+        usuario_id = usuario_data.get("usuario", {}).get("id") if isinstance(usuario_data, dict) else None
+    except ApiError:
+        pass  # Se não conseguir buscar, filtra por tentativa de acesso
+    
+    peladas_validas = []
+    if data and data.get("data"):
+        for pelada in data.get("data", []):
+            # Se temos o ID do usuário, verifica se ele é o gerente
+            if usuario_id and pelada.get("usuario_gerente_id"):
+                if pelada.get("usuario_gerente_id") == usuario_id:
+                    peladas_validas.append(pelada)
+                # Se não for o gerente, não adiciona
+            else:
+                # Se não temos o ID ou a pelada não tem usuario_gerente_id, 
+                # tenta acessar o perfil para verificar permissão
+                try:
+                    svc.perfil_pelada(pelada.get("id"))
+                    peladas_validas.append(pelada)
+                except ApiError as e:
+                    # Se der 403, não adiciona (usuário não tem acesso)
+                    if e.status_code != 403:
+                        # Outros erros, adiciona mesmo assim
+                        peladas_validas.append(pelada)
+    
+    # Atualiza os dados com apenas as peladas válidas
+    if peladas_validas:
+        data["data"] = peladas_validas
+        # Ajusta metadados
+        if "meta" in data:
+            data["meta"]["total"] = len(peladas_validas)
+            data["meta"]["total_pages"] = max(1, (len(peladas_validas) + data["meta"].get("per_page", 10) - 1) // data["meta"].get("per_page", 10))
+    else:
+        # Se não houver peladas válidas, garante estrutura vazia
+        data["data"] = []
+        if "meta" in data:
+            data["meta"]["total"] = 0
+            data["meta"]["total_pages"] = 0
+    
     return render_template("peladas/list.html", data=data)
 
 @peladas_bp.route("/peladas/<int:pelada_id>")

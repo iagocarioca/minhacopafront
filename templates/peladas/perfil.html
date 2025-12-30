@@ -6,7 +6,7 @@
 <!-- Capa de perfil -->
 {% if pelada.perfil_url %}
   <div class="mb-6 -mx-6 sm:-mx-8 lg:-mx-12">
-    <img src="http://192.168.18.162:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
+    <img src="/media/{{ pelada.perfil_url[1:] if pelada.perfil_url.startswith('/') else pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
   </div>
 {% endif %}
 
@@ -14,9 +14,9 @@
   <div class="flex items-center justify-between gap-3">
     <div class="flex items-center gap-3 flex-1">
       {% if pelada.logo_url %}
-        <img src="http://192.168.18.162:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+        <img src="/media/{{ pelada.logo_url[1:] if pelada.logo_url.startswith('/') else pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
       {% else %}
-        <img src="{{ url_for('static', filename='imgs/logo.png') }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+        <img src="{{ url_for('static', filename='imgs/logo.png') }}" alt="{{ pelada.nome }}" class="w-40 object-contain flex-shrink-0 max-w-full" />
       {% endif %}
       <div class="flex-1 min-w-0">
         <h2 class="text-lg font-semibold text-slate-900 truncate">{{ pelada.nome }}</h2>

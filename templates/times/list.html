@@ -67,7 +67,7 @@
         <div class="flex-1">
           <div class="flex items-center gap-3 mb-2">
             {% if t.escudo_url %}
-            <img src="http://192.168.18.162:5001{{ t.escudo_url }}" alt="{{ t.nome }}"
+            <img src="/media/{{ t.escudo_url[1:] if t.escudo_url.startswith('/') else t.escudo_url }}" alt="{{ t.nome }}"
               class="w-9 h-9 rounded-md object-cover flex-shrink-0 border border-slate-300/60" />
             {% else %}
             <div

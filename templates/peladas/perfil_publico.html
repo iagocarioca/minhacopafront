@@ -7,7 +7,7 @@
 <!-- Capa de perfil -->
 {% if pelada.perfil_url %}
   <div class="mb-6 -mx-6 sm:-mx-8 lg:-mx-12">
-    <img src="http://192.168.18.162:5001{{ pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
+    <img src="/media/{{ pelada.perfil_url[1:] if pelada.perfil_url.startswith('/') else pelada.perfil_url }}" alt="Capa da pelada" class="w-full h-48 sm:h-64 object-cover" />
   </div>
 {% endif %}
 
@@ -16,7 +16,7 @@
   <div class="rounded-md bg-white/60 backdrop-blur-xl p-5">
     <div class="flex items-center gap-4">
       {% if pelada.logo_url %}
-        <img src="http://192.168.18.162:5001{{ pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
+        <img src="/media/{{ pelada.logo_url[1:] if pelada.logo_url.startswith('/') else pelada.logo_url }}" alt="{{ pelada.nome }}" class="w-16 h-16 rounded-md object-cover border border-slate-300/60 flex-shrink-0" />
       {% else %}
         <div class="w-16 h-16 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 grid place-items-center flex-shrink-0">
           <i data-lucide="soccer-ball" class="w-8 h-8 text-white"></i>
@@ -106,7 +106,7 @@
                 <!-- Escudo do Time -->
                 <div class="flex-shrink-0">
                   {% if time.escudo_url %}
-                    <img src="http://192.168.18.162:5001{{ time.escudo_url }}" alt="{{ time.nome }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                    <img src="/media/{{ time.escudo_url[1:] if time.escudo_url.startswith('/') else time.escudo_url }}" alt="{{ time.nome }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
                   {% else %}
                     <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
                       <i data-lucide="shirt" class="w-5 h-5 text-white"></i>
@@ -160,7 +160,7 @@
                 <!-- Foto do Jogador -->
                 <div class="flex-shrink-0">
                   {% if jogador.foto_url %}
-                    <img src="http://192.168.18.162:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                    <img src="/media/{{ jogador.foto_url[1:] if jogador.foto_url.startswith('/') else jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
                   {% else %}
                     <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
                       <i data-lucide="user" class="w-5 h-5 text-white"></i>
@@ -212,7 +212,7 @@
                 <!-- Foto do Jogador -->
                 <div class="flex-shrink-0">
                   {% if jogador.foto_url %}
-                    <img src="http://192.168.18.162:5001{{ jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
+                    <img src="/media/{{ jogador.foto_url[1:] if jogador.foto_url.startswith('/') else jogador.foto_url }}" alt="{{ jogador.apelido or jogador.nome_completo }}" class="w-9 h-9 rounded-md object-cover border border-slate-300/60" />
                   {% else %}
                     <div class="w-9 h-9 rounded-md bg-gradient-to-br from-emerald-500 to-emerald-600 grid place-items-center">
                       <i data-lucide="user" class="w-5 h-5 text-white"></i>

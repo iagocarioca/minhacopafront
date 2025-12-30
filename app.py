@@ -3,6 +3,7 @@ import requests
 from services.api_client import API_BASE
 from services.api_client import ApiError
 from routes.auth import auth_bp
+from routes.index import index_bp
 from routes.peladas import peladas_bp
 from routes.jogadores import jogadores_bp
 from routes.temporadas import temporadas_bp
@@ -112,12 +113,14 @@ def create_app():
             # Rotas públicas de votação: votar e resultado
             if "/votar" in request.path or "/resultado" in request.path:
                 return None
+        # Rota index é pública
         if request.path == "/":
-            return redirect(url_for("peladas.list_create"))
+            return None
         if not session.get("access_token"):
             return redirect(url_for("auth.login"))
         return None
 
+    app.register_blueprint(index_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(peladas_bp)
     app.register_blueprint(jogadores_bp)
@@ -144,23 +147,39 @@ def create_app():
 
     @app.errorhandler(ApiError)
     def handle_api_error(err: ApiError):
-        # 401/403: sessão expirada / token inválido -> força login (evita loop de redirects)
-        if getattr(err, "status_code", None) in (401, 403):
+        status_code = getattr(err, "status_code", None)
+        payload = err.payload or {}
+        msg = payload.get("erro") or str(err) or "Erro na API"
+        
+        # 401: sessão expirada / token inválido -> força login
+        if status_code == 401:
             session.clear()
             flash("Sua sessão expirou. Faça login novamente.", "error")
             return redirect(url_for("auth.login"))
+        
+        # 403: pode ser sessão expirada OU falta de permissão
+        if status_code == 403:
+            # Se a mensagem indica acesso negado a recurso específico, não é sessão expirada
+            if "fora do seu escopo" in msg.lower() or "acesso negado" in msg.lower():
+                flash("Você não tem permissão para acessar este recurso.", "error")
+                # Redireciona para lista de peladas ao invés de login
+                return redirect(url_for("peladas.list_create"))
+            else:
+                # 403 genérico pode ser sessão expirada
+                session.clear()
+                flash("Sua sessão expirou. Faça login novamente.", "error")
+                return redirect(url_for("auth.login"))
 
-        msg = (err.payload or {}).get("erro") or str(err) or "Erro na API"
         flash(msg, "error")
 
         # Em GET, preferimos mostrar a tela amigável (evita redirect infinito para uma rota quebrada)
         if request.method == "GET":
             return render_template(
                 "errors/error.html",
-                code=getattr(err, "status_code", 400),
+                code=status_code or 400,
                 title="Não foi possível concluir",
                 message=msg,
-            ), getattr(err, "status_code", 400)
+            ), status_code or 400
 
         # Em POST/ações, volta para página anterior
         return _redirect_back_or_home()

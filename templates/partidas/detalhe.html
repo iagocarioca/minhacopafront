@@ -82,7 +82,14 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-medium text-slate-700 mb-1.5">Minuto</label>
-              <input name="minuto" placeholder="Ex: 15" class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+              <div class="relative">
+                <input name="minuto" id="minutoInput" placeholder="Ex: 15" class="w-full text-sm px-3 py-2.5 rounded-md border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500" />
+                {% if partida.status == 'em_andamento' %}
+                <button type="button" id="useTimerBtn" class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-medium text-emerald-600 hover:text-emerald-700 px-2 py-1 rounded border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 transition-all">
+                  Usar tempo
+                </button>
+                {% endif %}
+              </div>
             </div>
             <div>
               <label class="block text-xs font-medium text-slate-700 mb-1.5">&nbsp;</label>
@@ -93,7 +100,7 @@
             </div>
           </div>
 
-          <button class="w-full h-10 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
+          <button type="submit" class="w-full h-10 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium transition-all inline-flex items-center justify-center gap-2">
             {{ soccer_ball_icon("w-4 h-4", "white", "") }}
             Adicionar gol
           </button>
@@ -106,6 +113,65 @@
 <script>
 
 (function() {
+  // Timer de partida
+  let timerInterval = null;
+  let startTime = null;
+  let elapsedSeconds = 0;
+  let isPaused = false;
+  
+  function initTimer() {
+    const timerElement = document.getElementById('timer');
+    if (!timerElement) return;
+    
+    // Verifica se a partida está em andamento
+    const partidaStatus = '{{ partida.status }}';
+    if (partidaStatus !== 'em_andamento') return;
+    
+    // Inicia o timer a partir de 00:00
+    startTime = Date.now();
+    elapsedSeconds = 0;
+    isPaused = false;
+    
+    function updateTimer() {
+      if (isPaused) return;
+      
+      elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(elapsedSeconds / 60);
+      const seconds = elapsedSeconds % 60;
+      
+      const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      if (timerElement) {
+        timerElement.textContent = formatted;
+      }
+    }
+    
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+  }
+  
+  // Botão para usar o tempo atual no campo de minuto
+  function initUseTimerButton() {
+    const useTimerBtn = document.getElementById('useTimerBtn');
+    const minutoInput = document.getElementById('minutoInput');
+    
+    if (useTimerBtn && minutoInput) {
+      useTimerBtn.addEventListener('click', function() {
+        if (elapsedSeconds !== null) {
+          const minutes = Math.floor(elapsedSeconds / 60);
+          minutoInput.value = minutes;
+          // Feedback visual
+          useTimerBtn.textContent = '✓ Usado';
+          useTimerBtn.classList.add('bg-emerald-100', 'border-emerald-300');
+          setTimeout(() => {
+            useTimerBtn.textContent = 'Usar tempo';
+            useTimerBtn.classList.remove('bg-emerald-100', 'border-emerald-300');
+          }, 1500);
+        }
+      });
+    }
+  }
+  
+  // Filtro de jogadores
   const allJogadores = {};
   const allAssistencias = {};
   
@@ -185,14 +251,33 @@
       if (e.target.querySelector('#timeSelect')) {
         setTimeout(initFilter, 100);
       }
+      // Reinicia o timer se o placar foi atualizado
+      if (e.target.querySelector('#timer')) {
+        clearInterval(timerInterval);
+        initTimer();
+      }
     });
   }
   
+  // Inicialização
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFilter);
+    document.addEventListener('DOMContentLoaded', function() {
+      initTimer();
+      initUseTimerButton();
+      initFilter();
+    });
   } else {
+    initTimer();
+    initUseTimerButton();
     initFilter();
   }
+  
+  // Limpa o timer ao sair da página
+  window.addEventListener('beforeunload', function() {
+    if (timerInterval) {
+      clearInterval(timerInterval);
+    }
+  });
 })();
 </script>
 

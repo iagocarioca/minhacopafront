@@ -21,7 +21,7 @@
         <!-- Escudo (quadrado arredondado) -->
         <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-2 rounded-xl bg-white/80 backdrop-blur-xl grid place-items-center border border-slate-300/60 overflow-hidden">
           {% if casa.escudo_url %}
-            <img src="http://192.168.18.162:5001{{ casa.escudo_url }}" alt="{{ casa.nome }}" class="w-full h-full object-cover" />
+            <img src="/media/{{ casa.escudo_url[1:] if casa.escudo_url.startswith('/') else casa.escudo_url }}" alt="{{ casa.nome }}" class="w-full h-full object-cover" />
           {% elif casa.nome %}
             <span class="text-slate-900 font-semibold text-base">{{ (casa.nome[0:2] if casa.nome|length > 2 else casa.nome[0]) | upper }}</span>
           {% else %}
@@ -41,13 +41,9 @@
           <span class="text-3xl sm:text-4xl font-semibold leading-none tabular-nums">{{ partida.gols_fora or 0 }}</span>
         </div>
         {% if partida.status == 'em_andamento' %}
-          <div class="mt-2 text-[11px] text-slate-600 font-medium">
-            {% if partida.gols and partida.gols|length %}
-              {% set ultimo_gol = partida.gols[-1] %}
-              {% if ultimo_gol.minuto %}{{ ultimo_gol.minuto }}'{% endif %}
-            {% else %}
-              Em andamento
-            {% endif %}
+          <div class="mt-2 flex flex-col items-center gap-1">
+            <div id="timer" class="text-base font-mono font-semibold text-emerald-600 tabular-nums">00:00</div>
+            <div class="text-[10px] text-slate-500 font-medium">Tempo de jogo</div>
           </div>
         {% elif partida.status == 'finalizada' %}
           <div class="mt-2 text-[11px] text-slate-600 font-medium">Finalizada</div>
@@ -61,7 +57,7 @@
         <!-- Escudo (quadrado arredondado) -->
         <div class="w-14 h-14 sm:w-16 sm:h-16 mx-auto mb-2 rounded-xl bg-white/80 backdrop-blur-xl grid place-items-center border border-slate-300/60 overflow-hidden">
           {% if fora.escudo_url %}
-            <img src="http://192.168.18.162:5001{{ fora.escudo_url }}" alt="{{ fora.nome }}" class="w-full h-full object-cover" />
+            <img src="/media/{{ fora.escudo_url[1:] if fora.escudo_url.startswith('/') else fora.escudo_url }}" alt="{{ fora.nome }}" class="w-full h-full object-cover" />
           {% elif fora.nome %}
             <span class="text-slate-900 font-semibold text-base">{{ (fora.nome[0:2] if fora.nome|length > 2 else fora.nome[0]) | upper }}</span>
           {% else %}
